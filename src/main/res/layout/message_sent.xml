@@ -21,14 +21,15 @@
 
         <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/message_photo"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="30dp"
+            android:layout_height="31dp"
+            android:paddingBottom="1dp"
             android:scaleType="fitXY"
             app:riv_corner_radius="2dp" />
 
         <View
             android:id="@+id/placeholder"
-            android:layout_width="48dp"
+            android:layout_width="30dp"
             android:layout_height="3dp" />
     </LinearLayout>
 
