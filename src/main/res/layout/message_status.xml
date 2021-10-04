@@ -21,8 +21,8 @@
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/message_photo"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginRight="-1.5dp"
