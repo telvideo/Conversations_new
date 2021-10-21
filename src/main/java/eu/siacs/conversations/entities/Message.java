@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -1014,6 +1015,40 @@ public class Message extends AbstractEntity implements AvatarService.Avatarable 
         message.setCounterpart(counterpart);
         message.setTrueCounterpart(conversation.getMucOptions().getTrueCounterpart(counterpart));
         message.setType(isFile ? Message.TYPE_PRIVATE_FILE : Message.TYPE_PRIVATE);
+        return true;
+    }
+
+    /**
+     * Checks whether message should show an avatar next to it. Mainly used to hide the avatar
+     * when succeeding messages have the same author. Thus it defaults to true.
+     *
+     * @return boolean
+     */
+    public boolean isAvatarable() {
+        if (this.next() == null) {
+            return true;
+        }
+        Message next = this.next();
+
+        // same status (particularly sent vs received)
+        if (this.getStatus() == next.getStatus()) {
+            // same user
+            if (this.getAvatarName().equals(next.getAvatarName())) {
+                // same encryption
+                if (this.getEncryption() != next.getEncryption()) {
+                    return true;
+                }
+                // same day
+                if (!UIHelper.sameDay(this.getTimeSent(), next.getTimeSent())){
+                    return true;
+                }
+                // if merged, ask merged
+                if (next.wasMergedIntoPrevious()) {
+                    return next.isAvatarable();
+                }
+                return false;
+            }
+        }
         return true;
     }
 }

@@ -67,6 +67,7 @@ import eu.siacs.conversations.utils.Emoticons;
 import eu.siacs.conversations.utils.GeoHelper;
 import eu.siacs.conversations.utils.MessageUtils;
 import eu.siacs.conversations.utils.StylingHelper;
+import eu.siacs.conversations.utils.ThemeHelper;
 import eu.siacs.conversations.utils.TimeFrameUtils;
 import eu.siacs.conversations.utils.UIHelper;
 import eu.siacs.conversations.xmpp.Jid;
@@ -741,7 +742,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                 }
             }
             return view;
-        } else {
+        }
+        else {
             AvatarWorkerTask.loadAvatar(message, viewHolder.contact_picture, R.dimen.avatar);
         }
 
@@ -848,6 +850,22 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         }
 
         displayStatus(viewHolder, message, type, darkBackground);
+
+        if (message.isAvatarable()) {
+            viewHolder.contact_picture.setVisibility(View.VISIBLE);
+            int left = ThemeHelper.dp2Px(getContext(), 8);
+            int top = ThemeHelper.dp2Px(getContext(), 0);
+            int right = ThemeHelper.dp2Px(getContext(), 8);
+            int bottom = ThemeHelper.dp2Px(getContext(), 8);
+            view.setPadding(left, top, right, bottom);
+        } else {
+            viewHolder.contact_picture.setVisibility(View.INVISIBLE);
+            int left = ThemeHelper.dp2Px(getContext(), 8);
+            int top = ThemeHelper.dp2Px(getContext(), 0);
+            int right = ThemeHelper.dp2Px(getContext(), 8);
+            int bottom = ThemeHelper.dp2Px(getContext(), 0);
+            view.setPadding(left, top, right, bottom);
+        }
 
         return view;
     }
