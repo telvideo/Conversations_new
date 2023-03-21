@@ -72,7 +72,6 @@ public abstract class MessageDao {
     // it might return something that was previously a stub (message that only has reactions or
     // corrections but no original content). but in the process of invoking this method the stub
     // will be upgraded to an original message (missing information filled in)
-    @Transaction
     public MessageIdentifier getOrCreateMessage(
             ChatIdentifier chatIdentifier, final MessageTransformation transformation) {
         final MessageIdentifier messageIdentifier =

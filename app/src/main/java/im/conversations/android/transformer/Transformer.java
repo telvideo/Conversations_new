@@ -105,6 +105,8 @@ public class Transformer {
      */
     private boolean transform(
             final ConversationsDatabase database, final MessageTransformation transformation) {
+        Preconditions.checkState(
+                database.inTransaction(), "Transformations must be run from a transaction");
         final var remote = transformation.remote;
         final var messageType = transformation.type;
         final var muc = transformation.getExtension(MucUser.class);

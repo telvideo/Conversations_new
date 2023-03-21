@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.*;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import im.conversations.android.database.model.Account;
 import im.conversations.android.database.model.StanzaId;
@@ -141,6 +142,44 @@ public class ArchivePagingTest extends BaseTransformationTest {
         // the second ranges
         Assert.assertEquals(1, rangesSecondAttempt.size());
         MatcherAssert.assertThat(rangesSecondAttempt, contains(new Range(Range.Order.NORMAL, "6")));
+    }
+
+    @Test
+    public void liveMessageQuerySubmitTwiceWithDuplicates()
+            throws ExecutionException, InterruptedException {
+        final var stub2 = new StubMessage(2);
+        transformer.transform(stub2.messageTransformation(), stub2.stanzaId());
+
+        final var ranges = database.archiveDao().resetLivePage(account(), ACCOUNT);
+        Assert.assertEquals(2, ranges.size());
+        MatcherAssert.assertThat(
+                ranges,
+                contains(new Range(Range.Order.REVERSE, "2"), new Range(Range.Order.NORMAL, "2")));
+
+        final var account = account();
+
+        final var transformer =
+                new Transformer(account, ApplicationProvider.getApplicationContext(), database);
+
+        transformer.transform(
+                Collections.emptyList(),
+                ACCOUNT,
+                new Range(Range.Order.REVERSE, "2"),
+                new ArchiveManager.QueryResult(true, Page.emptyWithCount("2", null)),
+                true);
+        transformer.transform(
+                ImmutableList.of(stub2.messageTransformation()),
+                ACCOUNT,
+                new Range(Range.Order.NORMAL, "2"),
+                new ArchiveManager.QueryResult(false, new Page("3", "4", 2)),
+                false);
+
+        transformer.transform(
+                Collections.emptyList(),
+                ACCOUNT,
+                new Range(Range.Order.NORMAL, "4"),
+                new ArchiveManager.QueryResult(true, new Page("5", "6", 2)),
+                false);
     }
 
     private Account account() throws ExecutionException, InterruptedException {
