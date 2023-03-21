@@ -33,6 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:navigationIcon="@drawable/ic_arrow_back_24dp"
+                app:title="@{chatViewModel.title}"
                 app:menu="@menu/fragment_chat"/>
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -103,4 +104,13 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="chatViewModel"
+            type="im.conversations.android.ui.model.ChatViewModel" />
+    </data>
 </layout>

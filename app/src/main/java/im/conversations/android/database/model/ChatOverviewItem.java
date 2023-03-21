@@ -7,14 +7,10 @@ import im.conversations.android.database.entity.MessageContentEntity;
 import java.time.Instant;
 import java.util.List;
 import org.jxmpp.jid.Jid;
-import org.jxmpp.jid.impl.JidCreate;
 
-public class ChatOverviewItem {
+public class ChatOverviewItem extends ChatInfo {
 
     public long id;
-    public long accountId;
-    public String address;
-    public ChatType type;
 
     public Instant sentAt;
 
@@ -26,11 +22,6 @@ public class ChatOverviewItem {
     public String fromResource;
     public long version;
 
-    public String rosterName;
-    public String nick;
-    public String discoIdentityName;
-    public String bookmarkName;
-
     public String vCardPhoto;
     public String avatar;
 
@@ -41,14 +32,6 @@ public class ChatOverviewItem {
             parentColumn = "version",
             entityColumn = "messageVersionId")
     public List<MessageContent> contents;
-
-    public String name() {
-        return switch (type) {
-            case MUC -> mucName();
-            case INDIVIDUAL -> individualName();
-            default -> address;
-        };
-    }
 
     public String message() {
         final var firstMessageContent = Iterables.getFirst(contents, null);
@@ -69,38 +52,6 @@ public class ChatOverviewItem {
         }
     }
 
-    private String individualName() {
-        if (notNullNotEmpty(rosterName)) {
-            return rosterName.trim();
-        }
-        if (notNullNotEmpty(nick)) {
-            return nick.trim();
-        }
-        return fallbackName();
-    }
-
-    private String fallbackName() {
-        final Jid jid = getJidAddress();
-        if (jid == null) {
-            return this.address;
-        }
-        if (jid.hasLocalpart()) {
-            return jid.getLocalpartOrThrow().toString();
-        } else {
-            return jid.toString();
-        }
-    }
-
-    private String mucName() {
-        if (notNullNotEmpty(this.bookmarkName)) {
-            return this.bookmarkName.trim();
-        }
-        if (notNullNotEmpty(this.discoIdentityName)) {
-            return this.discoIdentityName.trim();
-        }
-        return fallbackName();
-    }
-
     public AddressWithName getAddressWithName() {
         final Jid address = getJidAddress();
         final String name = name();
@@ -108,10 +59,6 @@ public class ChatOverviewItem {
             return null;
         }
         return new AddressWithName(address, name);
-    }
-
-    private Jid getJidAddress() {
-        return address == null ? null : JidCreate.fromOrNull(address);
     }
 
     public AvatarWithAccount getAvatar() {
@@ -126,10 +73,6 @@ public class ChatOverviewItem {
             return new AvatarWithAccount(accountId, address, AvatarType.VCARD, this.vCardPhoto);
         }
         return null;
-    }
-
-    private static boolean notNullNotEmpty(final String value) {
-        return value != null && !value.trim().isEmpty();
     }
 
     @Override

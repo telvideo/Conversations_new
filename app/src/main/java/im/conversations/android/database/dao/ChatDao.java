@@ -13,6 +13,7 @@ import im.conversations.android.database.model.Account;
 import im.conversations.android.database.model.AccountIdentifier;
 import im.conversations.android.database.model.ChatFilter;
 import im.conversations.android.database.model.ChatIdentifier;
+import im.conversations.android.database.model.ChatInfo;
 import im.conversations.android.database.model.ChatOverviewItem;
 import im.conversations.android.database.model.ChatType;
 import im.conversations.android.database.model.GroupIdentifier;
@@ -221,6 +222,18 @@ public abstract class ChatDao {
                 + " c.archived=0 ORDER by m.receivedAt DESC")
     public abstract PagingSource<Integer, ChatOverviewItem> getChatOverview(
             final Long accountId, final Long groupId);
+
+    @Query(
+            "SELECT c.accountId,c.address,c.type,(SELECT name FROM roster WHERE"
+                + " roster.accountId=c.accountId AND roster.address=c.address) as"
+                + " rosterName,(SELECT nick FROM nick WHERE nick.accountId=c.accountId AND"
+                + " nick.address=c.address) as nick,(SELECT identity.name FROM disco_item JOIN"
+                + " disco_identity identity ON disco_item.discoId=identity.discoId WHERE"
+                + " disco_item.accountId=c.accountId AND disco_item.address=c.address LIMIT 1) as"
+                + " discoIdentityName,(SELECT name FROM bookmark WHERE"
+                + " bookmark.accountId=c.accountId AND bookmark.address=c.address) as bookmarkName"
+                + " FROM chat c WHERE c.id=:chatId")
+    public abstract LiveData<ChatInfo> getChatInfo(final long chatId);
 
     public PagingSource<Integer, ChatOverviewItem> getChatOverview(final ChatFilter chatFilter) {
         if (chatFilter instanceof AccountIdentifier account) {
