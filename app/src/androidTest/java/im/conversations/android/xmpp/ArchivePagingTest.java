@@ -2,15 +2,18 @@ package im.conversations.android.xmpp;
 
 import static org.hamcrest.Matchers.*;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.common.collect.Iterables;
 import im.conversations.android.database.model.Account;
 import im.conversations.android.database.model.StanzaId;
 import im.conversations.android.transformer.MessageTransformation;
+import im.conversations.android.transformer.Transformer;
 import im.conversations.android.xmpp.manager.ArchiveManager;
 import im.conversations.android.xmpp.model.jabber.Body;
 import im.conversations.android.xmpp.model.stanza.Message;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -95,6 +98,49 @@ public class ArchivePagingTest extends BaseTransformationTest {
         // the second ranges
         Assert.assertEquals(1, rangesSecondAttempt.size());
         MatcherAssert.assertThat(rangesSecondAttempt, contains(new Range(Range.Order.NORMAL, "4")));
+    }
+
+    @Test
+    public void liveMessageQuerySubmitTwice() throws ExecutionException, InterruptedException {
+        final var stub2 = new StubMessage(2);
+        transformer.transform(stub2.messageTransformation(), stub2.stanzaId());
+
+        final var ranges = database.archiveDao().resetLivePage(account(), ACCOUNT);
+        Assert.assertEquals(2, ranges.size());
+        MatcherAssert.assertThat(
+                ranges,
+                contains(new Range(Range.Order.REVERSE, "2"), new Range(Range.Order.NORMAL, "2")));
+
+        final var account = account();
+
+        final var transformer =
+                new Transformer(account, ApplicationProvider.getApplicationContext(), database);
+
+        transformer.transform(
+                Collections.emptyList(),
+                ACCOUNT,
+                new Range(Range.Order.REVERSE, "2"),
+                new ArchiveManager.QueryResult(true, Page.emptyWithCount("2", null)),
+                true);
+        transformer.transform(
+                Collections.emptyList(),
+                ACCOUNT,
+                new Range(Range.Order.NORMAL, "2"),
+                new ArchiveManager.QueryResult(false, new Page("3", "4", 2)),
+                false);
+
+        transformer.transform(
+                Collections.emptyList(),
+                ACCOUNT,
+                new Range(Range.Order.NORMAL, "4"),
+                new ArchiveManager.QueryResult(true, new Page("5", "6", 2)),
+                false);
+
+        final var rangesSecondAttempt = database.archiveDao().resetLivePage(account(), ACCOUNT);
+        // we mark the reversing range as complete in the submit above; hence it is not included in
+        // the second ranges
+        Assert.assertEquals(1, rangesSecondAttempt.size());
+        MatcherAssert.assertThat(rangesSecondAttempt, contains(new Range(Range.Order.NORMAL, "6")));
     }
 
     private Account account() throws ExecutionException, InterruptedException {

@@ -3,7 +3,6 @@ package im.conversations.android.transformer;
 import android.content.Context;
 import androidx.annotation.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import im.conversations.android.axolotl.AxolotlService;
 import im.conversations.android.database.ConversationsDatabase;
 import im.conversations.android.database.model.Account;
@@ -24,6 +23,7 @@ import im.conversations.android.xmpp.model.reply.Reply;
 import im.conversations.android.xmpp.model.retract.Retract;
 import im.conversations.android.xmpp.model.stanza.Message;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import org.jxmpp.jid.Jid;
 import org.slf4j.Logger;
@@ -76,7 +76,7 @@ public class Transformer {
     }
 
     public void transform(
-            ImmutableList<MessageTransformation> messageTransformations,
+            List<MessageTransformation> messageTransformations,
             final Jid archive,
             Range queryRange,
             ArchiveManager.QueryResult queryResult,
