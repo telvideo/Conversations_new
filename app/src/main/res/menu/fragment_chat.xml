@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_ongoing_call"
+        android:icon="@drawable/ic_phone_in_talk_24dp"
+        android:orderInCategory="9"
+        android:title="@string/return_to_ongoing_call"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_call"
+        android:icon="@drawable/ic_call_24dp"
+        android:orderInCategory="10"
+        android:title="@string/make_call"
+        app:showAsAction="ifRoom">
+        <menu>
+            <item
+                android:id="@+id/action_audio_call"
+                android:icon="@drawable/ic_call_24dp"
+                android:title="@string/audio_call" />
+            <item
+                android:id="@+id/action_video_call"
+                android:icon="@drawable/ic_video_call_24dp"
+                android:title="@string/video_call" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_security"
+        android:icon="@drawable/ic_lock_open_24dp"
+        android:orderInCategory="20"
+        android:title="@string/encrypted_with_omemo"
+        app:showAsAction="ifRoom">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/encryption_choice_none"
+                    android:title="@string/encryption_choice_unencrypted" />
+                <item
+                    android:id="@+id/encryption_choice_axolotl"
+                    android:title="@string/encryption_choice_omemo" />
+                <item
+                    android:id="@+id/encryption_choice_pgp"
+                    android:title="@string/encryption_choice_pgp" />
+            </group>
+        </menu>
+    </item>
+
+
+    <item
+        android:orderInCategory="70"
+        android:id="@+id/archive_chat"
+        android:title="@string/archive"
+        app:showAsAction="never" />
+    <item
+        android:orderInCategory="80"
+        android:id="@+id/delete"
+        android:title="@string/delete"
+        app:showAsAction="never" />
+
+</menu>

@@ -1048,5 +1048,6 @@
     <string name="trust_cerficate">Trust certificate</string>
     <string name="you">You</string>
     <string name="check_your_internet_connection">Check your Internet connection</string>
+    <string name="archive">Archive</string>
 
 </resources>

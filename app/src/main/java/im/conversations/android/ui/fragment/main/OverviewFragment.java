@@ -23,7 +23,9 @@ import im.conversations.android.database.model.AccountIdentifier;
 import im.conversations.android.database.model.ChatFilter;
 import im.conversations.android.database.model.GroupIdentifier;
 import im.conversations.android.databinding.FragmentOverviewBinding;
+import im.conversations.android.ui.Activities;
 import im.conversations.android.ui.Intents;
+import im.conversations.android.ui.NavControllers;
 import im.conversations.android.ui.activity.SettingsActivity;
 import im.conversations.android.ui.activity.SetupActivity;
 import im.conversations.android.ui.adapter.ChatOverviewAdapter;
@@ -112,7 +114,15 @@ public class OverviewFragment extends Fragment {
         requireActivity()
                 .getOnBackPressedDispatcher()
                 .addCallback(getViewLifecycleOwner(), this.searchViewOnBackPressedCallback);
+        this.chatOverviewAdapter.setOnChatSelectedListener(this::onChatSelected);
+        Activities.setStatusAndNavigationBarColors(requireActivity(), binding.getRoot());
         return binding.getRoot();
+    }
+
+    private void onChatSelected(long chatId) {
+        final var navController =
+                NavControllers.findNavController(requireActivity(), R.id.nav_host_fragment);
+        navController.navigate(OverviewFragmentDirections.overviewToChat(chatId));
     }
 
     @Override
@@ -237,5 +247,17 @@ public class OverviewFragment extends Fragment {
                 this.binding.navigationView.setCheckedItem(menuItemAccount);
             }
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        nullReferences();
+        super.onDestroyView();
+    }
+
+    private void nullReferences() {
+        this.binding.chats.setAdapter(null);
+        this.chatOverviewAdapter = null;
+        this.binding = null;
     }
 }

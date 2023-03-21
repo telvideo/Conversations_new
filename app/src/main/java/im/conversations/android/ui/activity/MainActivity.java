@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModelProvider;
 import im.conversations.android.R;
 import im.conversations.android.databinding.ActivityMainBinding;
 import im.conversations.android.service.ForegroundService;
-import im.conversations.android.ui.Activities;
 import im.conversations.android.ui.model.MainViewModel;
 
 public class MainActivity extends BaseActivity {
@@ -30,7 +29,6 @@ public class MainActivity extends BaseActivity {
                                 finish();
                             }
                         });
-        Activities.setStatusAndNavigationBarColors(this, binding.getRoot());
     }
 
     @Override

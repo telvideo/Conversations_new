@@ -1,23 +1,22 @@
 package im.conversations.android.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.view.View;
-import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.elevation.SurfaceColors;
 
 public final class Activities {
 
     private Activities() {}
 
-    public static void setStatusAndNavigationBarColors(
-            final AppCompatActivity activity, final View view) {
+    public static void setStatusAndNavigationBarColors(final Activity activity, final View view) {
         setStatusAndNavigationBarColors(activity, view, false);
     }
 
     public static void setStatusAndNavigationBarColors(
-            final AppCompatActivity activity, final View view, final boolean raisedStatusBar) {
+            final Activity activity, final View view, final boolean raisedStatusBar) {
         final var isLightMode = isLightMode(activity);
         final var window = activity.getWindow();
         final var flags = view.getSystemUiVisibility();

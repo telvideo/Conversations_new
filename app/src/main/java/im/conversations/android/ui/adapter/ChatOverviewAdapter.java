@@ -12,6 +12,7 @@ import im.conversations.android.R;
 import im.conversations.android.database.model.ChatOverviewItem;
 import im.conversations.android.databinding.ItemChatoverviewBinding;
 import im.conversations.android.ui.AvatarFetcher;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,8 @@ public class ChatOverviewAdapter
         extends PagingDataAdapter<ChatOverviewItem, ChatOverviewAdapter.ChatOverviewViewHolder> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChatOverviewAdapter.class);
+
+    private Consumer<Long> onChatSelected;
 
     public ChatOverviewAdapter(@NonNull DiffUtil.ItemCallback<ChatOverviewItem> diffCallback) {
         super(diffCallback);
@@ -42,6 +45,12 @@ public class ChatOverviewAdapter
         final var addressWithName =
                 chatOverviewItem == null ? null : chatOverviewItem.getAddressWithName();
         final var avatar = chatOverviewItem == null ? null : chatOverviewItem.getAvatar();
+        holder.binding.chat.setOnClickListener(
+                (v) -> {
+                    if (onChatSelected != null && chatOverviewItem != null) {
+                        onChatSelected.accept(chatOverviewItem.id);
+                    }
+                });
         if (avatar != null) {
             holder.binding.avatar.setVisibility(View.VISIBLE);
             AvatarFetcher.fetchInto(holder.binding.avatar, avatar);
@@ -51,6 +60,10 @@ public class ChatOverviewAdapter
         } else {
             holder.binding.avatar.setVisibility(View.INVISIBLE);
         }
+    }
+
+    public void setOnChatSelectedListener(final Consumer<Long> onChatSelected) {
+        this.onChatSelected = onChatSelected;
     }
 
     public static class ChatOverviewViewHolder extends RecyclerView.ViewHolder {

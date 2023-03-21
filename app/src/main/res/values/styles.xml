@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Widget.C3.TextInputEditText.FilledBox.Tertiary" parent="Widget.Material3.TextInputEditText.FilledBox">
+        <item name="android:textColor">?colorOnTertiaryContainer</item>
+        <item name="android:textColorHint">@color/hint_on_tertiary_container</item>
+    </style>
+    <style name="ThemeOverlay.C3.TextSelection.Secondary" parent="">
+        <item name="colorControlActivated">?colorSecondary</item>
+        <item name="android:textColorHighlight">?colorSecondaryContainer</item>
+    </style>
+</resources>
+

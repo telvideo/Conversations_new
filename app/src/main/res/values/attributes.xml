@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="C3">
+        <attr name="hintAlpha" format="float" />
+    </declare-styleable>
+</resources>

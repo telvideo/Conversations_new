@@ -22,7 +22,17 @@
     <fragment
         android:id="@+id/overview"
         android:name="im.conversations.android.ui.fragment.main.OverviewFragment"
-        tools:layout="@layout/fragment_overview" />
+        tools:layout="@layout/fragment_overview">
+        <action android:id="@+id/overview_to_chat" app:destination="@+id/chat"/>
+    </fragment>
+
+    <fragment android:id="@+id/chat"
+        android:name="im.conversations.android.ui.fragment.main.ChatFragment"
+        tools:layout="@layout/fragment_chat">
+        <argument android:name="chat"
+            app:argType="long"
+            app:nullable="false"/>
+    </fragment>
 
 
 </navigation>
