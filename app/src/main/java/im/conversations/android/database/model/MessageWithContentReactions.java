@@ -1,7 +1,10 @@
 package im.conversations.android.database.model;
 
 import androidx.room.Relation;
+
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 import im.conversations.android.database.entity.MessageContentEntity;
@@ -67,5 +70,12 @@ public class MessageWithContentReactions {
         return ImmutableSortedSet.copyOf(
                 (a, b) -> Integer.compare(b.getValue(), a.getValue()),
                 aggregatedReactions.entrySet());
+    }
+
+    public String textContent() {
+        final var content = Iterables.getFirst(this.contents,null);
+        final var text = Strings.nullToEmpty(content == null ? null : content.body);
+        return text;
+        //return text.substring(0,Math.min(text.length(),20));
     }
 }

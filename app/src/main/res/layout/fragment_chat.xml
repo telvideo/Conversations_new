@@ -37,7 +37,7 @@
                 app:menu="@menu/fragment_chat"/>
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <RelativeLayout
             android:id="@+id/chat"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -45,64 +45,73 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/chats"
+                android:id="@+id/messages"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toTopOf="@+id/message_layout"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_height="match_parent"
+                android:layout_above="@+id/compose_box"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_message_received"/>
 
-            <Button
-                android:layout_marginStart="8dp"
-                android:id="@+id/add_content"
-                style="?attr/materialIconButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:icon="@drawable/ic_add_circle_outline_24dp"
-                app:iconTint="?colorOnSurface"
-                app:iconSize="24dp"
-                android:padding="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/message_layout"
-                app:layout_constraintEnd_toStartOf="@+id/message_layout"
-                app:layout_constraintStart_toStartOf="parent" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/compose_box"
+                android:layout_alignParentBottom="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/message_layout"
-                style="@style/Widget.Material3.TextInputLayout.FilledBox"
-                android:theme="@style/ThemeOverlay.C3.TextSelection.Secondary"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:minHeight="48dp"
-                app:boxBackgroundColor="?colorTertiaryContainer"
-                app:boxCornerRadiusBottomEnd="24dp"
-                app:boxCornerRadiusBottomStart="24dp"
-                app:boxCornerRadiusTopEnd="24dp"
-                app:boxCornerRadiusTopStart="24dp"
-                app:boxStrokeWidth="0dp"
-                app:boxStrokeWidthFocused="0dp"
-                app:endIconDrawable="@drawable/ic_send_24dp"
-                app:endIconMode="custom"
-                app:endIconTint="?colorOnTertiaryContainer"
-                app:expandedHintEnabled="false"
-                app:helperTextEnabled="false"
-                app:hintEnabled="false"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/add_content">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    style="@style/Widget.C3.TextInputEditText.FilledBox.Tertiary"
-                    android:theme="@style/ThemeOverlay.C3.TextSelection.Secondary"
-                    android:id="@+id/message"
-                    android:layout_width="match_parent"
+                <Button
+                    android:id="@+id/add_content"
+                    style="?attr/materialIconButtonStyle"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:hint="@string/send_message"
                     android:padding="8dp"
-                    android:maxHeight="112dp" />
+                    app:icon="@drawable/ic_add_circle_outline_24dp"
+                    app:iconSize="24dp"
+                    app:iconTint="?colorOnSurface"
+                    app:layout_constraintBottom_toBottomOf="@+id/message_layout"
+                    app:layout_constraintStart_toStartOf="parent" />
 
-            </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/message_layout"
+                    style="@style/Widget.Material3.TextInputLayout.FilledBox"
+                    android:theme="@style/ThemeOverlay.C3.TextSelection.Secondary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:minHeight="48dp"
+                    app:boxBackgroundColor="?colorTertiaryContainer"
+                    app:boxCornerRadiusBottomEnd="24dp"
+                    app:boxCornerRadiusBottomStart="24dp"
+                    app:boxCornerRadiusTopEnd="24dp"
+                    app:boxCornerRadiusTopStart="24dp"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="0dp"
+                    app:endIconDrawable="@drawable/ic_send_24dp"
+                    app:endIconMode="custom"
+                    app:endIconTint="?colorOnTertiaryContainer"
+                    app:expandedHintEnabled="false"
+                    app:helperTextEnabled="false"
+                    app:hintEnabled="false"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/add_content">
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        style="@style/Widget.C3.TextInputEditText.FilledBox.Tertiary"
+                        android:theme="@style/ThemeOverlay.C3.TextSelection.Secondary"
+                        android:id="@+id/message"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/send_message"
+                        android:padding="8dp"
+                        android:maxHeight="112dp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        </RelativeLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <data>

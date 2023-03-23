@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import im.conversations.android.R;
 import im.conversations.android.database.model.ChatOverviewItem;
-import im.conversations.android.databinding.ItemChatoverviewBinding;
+import im.conversations.android.databinding.ItemChatOverviewBinding;
 import im.conversations.android.ui.AvatarFetcher;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ public class ChatOverviewAdapter
         return new ChatOverviewViewHolder(
                 DataBindingUtil.inflate(
                         LayoutInflater.from(parent.getContext()),
-                        R.layout.item_chatoverview,
+                        R.layout.item_chat_overview,
                         parent,
                         false));
     }
@@ -68,9 +68,9 @@ public class ChatOverviewAdapter
 
     public static class ChatOverviewViewHolder extends RecyclerView.ViewHolder {
 
-        private final ItemChatoverviewBinding binding;
+        private final ItemChatOverviewBinding binding;
 
-        public ChatOverviewViewHolder(@NonNull ItemChatoverviewBinding binding) {
+        public ChatOverviewViewHolder(@NonNull ItemChatOverviewBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

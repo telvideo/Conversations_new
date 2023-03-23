@@ -59,7 +59,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                         originalMessage.getFrom().asBareJid(),
                         null));
 
-        final var messages = database.messageDao().getMessages(1L);
+        final var messages = database.messageDao().getMessagesForTesting(1L);
         Assert.assertEquals(1, messages.size());
         final var message = Iterables.getOnlyElement(messages);
         final var onlyContent = Iterables.getOnlyElement(message.contents);
@@ -103,7 +103,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                 MessageTransformation.of(
                         reactionC, Instant.now(), REMOTE, "stanza-d", null, "id-user-d"));
 
-        final var messages = database.messageDao().getMessages(1L);
+        final var messages = database.messageDao().getMessagesForTesting(1L);
         Assert.assertEquals(1, messages.size());
         final var dbMessage = Iterables.getOnlyElement(messages);
         Assert.assertEquals(4, dbMessage.reactions.size());
@@ -136,7 +136,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                         null));
 
         // the correction should not show up as a message
-        Assert.assertEquals(0, database.messageDao().getMessages(1L).size());
+        Assert.assertEquals(0, database.messageDao().getMessagesForTesting(1L).size());
 
         final var messageWithTypo = new Message();
         messageWithTypo.setId("1");
@@ -153,7 +153,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                         messageWithTypo.getFrom().asBareJid(),
                         null));
 
-        final var messages = database.messageDao().getMessages(1L);
+        final var messages = database.messageDao().getMessagesForTesting(1L);
 
         Assert.assertEquals(1, messages.size());
 
@@ -181,7 +181,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                         messageWithTypo.getFrom().asBareJid(),
                         null));
 
-        Assert.assertEquals(1, database.messageDao().getMessages(1L).size());
+        Assert.assertEquals(1, database.messageDao().getMessagesForTesting(1L).size());
 
         final var messageCorrection = new Message();
         messageCorrection.setId("2");
@@ -199,7 +199,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                         messageCorrection.getFrom().asBareJid(),
                         null));
 
-        final var messages = database.messageDao().getMessages(1L);
+        final var messages = database.messageDao().getMessagesForTesting(1L);
 
         Assert.assertEquals(1, messages.size());
 
@@ -233,7 +233,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                 MessageTransformation.of(
                         reactionB, Instant.now(), REMOTE, "stanza-c", null, "id-user-b"));
 
-        final var messages = database.messageDao().getMessages(1L);
+        final var messages = database.messageDao().getMessagesForTesting(1L);
         Assert.assertEquals(1, messages.size());
         final var dbMessage = Iterables.getOnlyElement(messages);
         Assert.assertEquals(1, dbMessage.reactions.size());
@@ -298,7 +298,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                 MessageTransformation.of(
                         m4, Instant.ofEpochMilli(1000), REMOTE, ogStanzaId, null, "id-user-a"));
 
-        final var messages = database.messageDao().getMessages(1L);
+        final var messages = database.messageDao().getMessagesForTesting(1L);
         Assert.assertEquals(1, messages.size());
         final var dbMessage = Iterables.getOnlyElement(messages);
         Assert.assertEquals(1, dbMessage.reactions.size());
@@ -363,7 +363,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                 MessageTransformation.of(
                         m4, Instant.ofEpochMilli(1000), REMOTE, ogStanzaId, null, "id-user-a"));
 
-        final var messages = database.messageDao().getMessages(1L);
+        final var messages = database.messageDao().getMessagesForTesting(1L);
         Assert.assertEquals(1, messages.size());
         final var dbMessage = Iterables.getOnlyElement(messages);
         Assert.assertEquals(2, dbMessage.reactions.size());
@@ -415,7 +415,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                         null,
                         "id-user-c"));
 
-        final var messages = database.messageDao().getMessages(1L);
+        final var messages = database.messageDao().getMessagesForTesting(1L);
         Assert.assertEquals(1, messages.size());
         final var dbMessage = Iterables.getOnlyElement(messages);
         Assert.assertEquals(2, dbMessage.reactions.size());
@@ -451,7 +451,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                 MessageTransformation.of(
                         m2, Instant.now(), REMOTE, "stanza-b", m2.getFrom().asBareJid(), null));
 
-        final var messages = database.messageDao().getMessages(1L);
+        final var messages = database.messageDao().getMessagesForTesting(1L);
         Assert.assertEquals(2, messages.size());
         final var response = Iterables.get(messages, 1);
         Assert.assertNotNull(response.inReplyToMessageEntityId);
@@ -486,7 +486,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                 MessageTransformation.of(
                         m2, Instant.now(), REMOTE, null, m2.getFrom().asBareJid(), null));
 
-        final var messages = database.messageDao().getMessages(1L);
+        final var messages = database.messageDao().getMessagesForTesting(1L);
         final var message = Iterables.getOnlyElement(messages);
 
         Assert.assertEquals(1L, message.states.size());
@@ -513,7 +513,7 @@ public class MessageTransformationTest extends BaseTransformationTest {
                 MessageTransformation.of(
                         m2, Instant.now(), REMOTE, null, m2.getFrom().asBareJid(), null));
 
-        final var messages = database.messageDao().getMessages(1L);
+        final var messages = database.messageDao().getMessagesForTesting(1L);
         final var message = Iterables.getOnlyElement(messages);
         Assert.assertEquals(Modification.RETRACTION, message.modification);
         Assert.assertEquals(PartType.RETRACTION, Iterables.getOnlyElement(message.contents).type);

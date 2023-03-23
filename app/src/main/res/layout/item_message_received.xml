@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="@dimen/avatar_chat_overview_size"
+            android:layout_height="@dimen/avatar_chat_overview_size"
+            android:layout_marginStart="8dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:background="@drawable/background_message_received"
+            android:minHeight="40dp"
+            android:padding="8dp"
+            android:layout_marginTop="4dp"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@id/avatar"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?colorOnSecondaryContainer"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:text="@{message.textContent}"
+                tools:text="Fusce vitae vehicula risus, nec ornare lorem. Quisque facilisis mattis velit ac porttitor. Aenean aliquet pretium varius. Quisque neque felis, mattis sit amet leo ac, tempus dapibus nibh." />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="message"
+            type="im.conversations.android.database.model.MessageWithContentReactions" />
+    </data>
+</layout>

@@ -1,6 +1,8 @@
 package im.conversations.android.database.dao;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+import androidx.paging.PagingSource;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -420,6 +422,7 @@ public abstract class MessageDao {
                     + " reactionBy=:fromBare")
     protected abstract void deleteReactionsByFromBare(long messageEntityId, BareJid fromBare);
 
+    @VisibleForTesting
     @Transaction
     @Query(
             "SELECT message.id as"
@@ -431,7 +434,20 @@ public abstract class MessageDao {
                 + " message.senderIdentity=axolotl_identity.address AND"
                 + " message_version.identityKey=axolotl_identity.identityKey WHERE chat.id=:chatId"
                 + " AND latestVersion IS NOT NULL ORDER BY message.receivedAt")
-    public abstract List<MessageWithContentReactions> getMessages(long chatId);
+    public abstract List<MessageWithContentReactions> getMessagesForTesting(long chatId);
+
+    @Transaction
+    @Query(
+            "SELECT message.id as"
+                    + " id,sentAt,outgoing,toBare,toResource,fromBare,fromResource,modification,latestVersion"
+                    + " as version,inReplyToMessageEntityId,encryption,message_version.identityKey,trust"
+                    + " FROM chat JOIN message on message.chatId=chat.id JOIN message_version ON"
+                    + " message.latestVersion=message_version.id LEFT JOIN axolotl_identity ON"
+                    + " chat.accountId=axolotl_identity.accountId AND"
+                    + " message.senderIdentity=axolotl_identity.address AND"
+                    + " message_version.identityKey=axolotl_identity.identityKey WHERE chat.id=:chatId"
+                    + " AND latestVersion IS NOT NULL ORDER BY message.receivedAt DESC")
+    public abstract PagingSource<Integer,MessageWithContentReactions> getMessages(long chatId);
 
     public void setInReplyTo(
             ChatIdentifier chat,
