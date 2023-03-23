@@ -14,6 +14,8 @@ public class ChatInfo {
     public String discoIdentityName;
     public String bookmarkName;
 
+    public boolean membersOnlyNonAnonymous;
+
     public String name() {
         return switch (type) {
             case MUC -> mucName();
