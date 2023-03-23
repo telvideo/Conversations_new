@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:textAppearance="?textAppearanceLabelMedium"
-            app:instant="@{chatOverviewItem.sentAt}"
+            app:datetime="@{chatOverviewItem.sentAt}"
             app:layout_constraintBaseline_toBaselineOf="@+id/name"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="23:24" />

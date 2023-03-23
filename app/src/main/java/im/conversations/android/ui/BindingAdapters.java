@@ -53,8 +53,8 @@ public class BindingAdapters {
         return a.truncatedTo(ChronoUnit.DAYS).equals(b.truncatedTo(ChronoUnit.DAYS));
     }
 
-    @BindingAdapter("instant")
-    public static void setInstant(final TextView textView, final Instant instant) {
+    @BindingAdapter("datetime")
+    public static void setDatetime(final TextView textView, final Instant instant) {
         if (instant == null || instant.getEpochSecond() <= 0) {
             textView.setVisibility(View.GONE);
         } else {
@@ -65,13 +65,13 @@ public class BindingAdapters {
                 textView.setText(
                         DateUtils.formatDateTime(
                                 context,
-                                instant.getEpochSecond() * 1000,
+                                instant.toEpochMilli(),
                                 DateUtils.FORMAT_SHOW_TIME));
             } else if (sameYear(instant, now) || now.minus(THREE_MONTH).isBefore(instant)) {
                 textView.setText(
                         DateUtils.formatDateTime(
                                 context,
-                                instant.getEpochSecond() * 1000,
+                                instant.toEpochMilli(),
                                 DateUtils.FORMAT_SHOW_DATE
                                         | DateUtils.FORMAT_NO_YEAR
                                         | DateUtils.FORMAT_ABBREV_ALL));
@@ -79,11 +79,27 @@ public class BindingAdapters {
                 textView.setText(
                         DateUtils.formatDateTime(
                                 context,
-                                instant.getEpochSecond() * 1000,
+                                instant.toEpochMilli(),
                                 DateUtils.FORMAT_SHOW_DATE
                                         | DateUtils.FORMAT_NO_MONTH_DAY
                                         | DateUtils.FORMAT_ABBREV_ALL));
             }
+        }
+    }
+
+    @BindingAdapter("time")
+    public static void setTime(final TextView textView, final Instant instant) {
+        if (instant == null || instant.getEpochSecond() <= 0) {
+            textView.setVisibility(View.GONE);
+        } else {
+            final Context context = textView.getContext();
+            final Instant now = Instant.now();
+            textView.setVisibility(View.VISIBLE);
+                textView.setText(
+                        DateUtils.formatDateTime(
+                                context,
+                                instant.toEpochMilli(),
+                                DateUtils.FORMAT_SHOW_TIME));
         }
     }
 

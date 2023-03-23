@@ -64,12 +64,7 @@ public class MessageAdapter extends PagingDataAdapter<MessageWithContentReaction
 
         @Override
         protected void setMessage(final MessageWithContentReactions message) {
-            if (message == null) {
-                this.binding.setMessage(null);
-                this.binding.text.setText("(placeholder)");
-            } else {
-                this.binding.setMessage(message);
-            }
+            this.binding.setMessage(message);
         }
     }
 }
