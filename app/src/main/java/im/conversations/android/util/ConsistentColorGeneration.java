@@ -53,7 +53,11 @@ public final class ConsistentColorGeneration {
     }
 
     public static int harmonized(final Context context, final Jid jid) {
-        return harmonized(context, jid.toString());
+        if (jid.hasResource()) {
+            return harmonized(context, jid.getResourceOrEmpty().toString());
+        } else {
+            return harmonized(context, jid.toString());
+        }
     }
 
     @ColorInt
