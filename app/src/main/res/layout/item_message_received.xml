@@ -66,10 +66,38 @@
             android:layout_marginStart="4sp"
             android:src="@drawable/ic_lock_outline_24dp"
             android:visibility="visible"
+            app:encryption="@{message.getEncryption()}"
+            app:layout_constraintBottom_toBottomOf="@+id/time"
+            app:layout_constraintStart_toEndOf="@+id/sender"
+            app:layout_constraintTop_toTopOf="@+id/time"
+            app:tint="?colorOnSurface" />
+
+        <ImageView
+            android:id="@+id/senderSeparator"
+            android:layout_width="3sp"
+            android:layout_height="3sp"
+            android:layout_marginStart="4sp"
+            android:src="@drawable/ic_middle_dot_24dp"
+            android:textAppearance="?textAppearanceTitleLarge"
+            android:visibility="@{message.isGroupChat() ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toBottomOf="@+id/time"
             app:layout_constraintStart_toEndOf="@+id/time"
             app:layout_constraintTop_toTopOf="@+id/time"
-            app:tint="?colorOnSurface" />
+            app:tint="?colorOnSurface"
+            tools:ignore="SmallSp" />
+
+        <TextView
+            android:id="@+id/sender"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4sp"
+            android:text="@{message.sender}"
+            android:textAppearance="?textAppearanceLabelSmall"
+            android:textColor="?colorOnSurface"
+            android:visibility="@{message.isGroupChat() ? View.VISIBLE : View.GONE}"
+            app:layout_constraintBaseline_toBaselineOf="@+id/time"
+            app:layout_constraintStart_toEndOf="@+id/senderSeparator"
+            tools:text="Juliet" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

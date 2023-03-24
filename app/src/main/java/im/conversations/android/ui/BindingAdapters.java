@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.format.DateUtils;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.databinding.BindingAdapter;
@@ -13,6 +14,9 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.common.base.Supplier;
 import im.conversations.android.R;
 import im.conversations.android.database.model.ChatOverviewItem;
+import im.conversations.android.database.model.Encryption;
+import im.conversations.android.database.model.MessageWithContentReactions;
+import im.conversations.android.database.model.Trust;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -111,6 +115,33 @@ public class BindingAdapters {
                 textView.setText(String.format("%s:", senderName.name));
             }
             textView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @BindingAdapter("encryption")
+    public static void setEncryption(
+            final ImageView imageView,
+            final MessageWithContentReactions.EncryptionTuple encryptionTuple) {
+        if (encryptionTuple == null) {
+            imageView.setVisibility(View.GONE);
+            return;
+        }
+        final var encryption = encryptionTuple.encryption;
+        final var trust = encryptionTuple.trust;
+        if (encryption == null || encryption == Encryption.CLEARTEXT) {
+            imageView.setVisibility(View.GONE);
+        } else if (encryption == Encryption.OMEMO || encryption == Encryption.PGP) {
+            if (trust == Trust.VERIFIED || trust == Trust.VERIFIED_X509) {
+                imageView.setImageResource(R.drawable.ic_verified_user_24dp);
+            } else {
+                imageView.setImageResource(R.drawable.ic_lock_outline_24dp);
+            }
+            imageView.setVisibility(View.VISIBLE);
+        } else if (encryption == Encryption.FAILURE) {
+            imageView.setImageResource(R.drawable.ic_encryption_errorred_24dp);
+            imageView.setVisibility(View.VISIBLE);
+        } else {
+            throw new IllegalArgumentException(String.format("Unknown encryption %s", encryption));
         }
     }
 }

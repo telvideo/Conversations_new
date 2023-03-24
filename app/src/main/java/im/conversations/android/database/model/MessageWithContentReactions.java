@@ -149,4 +149,26 @@ public class MessageWithContentReactions implements IndividualName {
     public BareJid individualAddress() {
         return sender;
     }
+
+    public String getSender() {
+        return this.fromResource == null ? null : fromResource.toString();
+    }
+
+    public boolean isGroupChat() {
+        return Arrays.asList(ChatType.MUC, ChatType.MULTICAST).contains(this.chatType);
+    }
+
+    public EncryptionTuple getEncryption() {
+        return new EncryptionTuple(this.encryption, this.trust);
+    }
+
+    public static class EncryptionTuple {
+        public final Encryption encryption;
+        public final Trust trust;
+
+        public EncryptionTuple(Encryption encryption, Trust trust) {
+            this.encryption = encryption;
+            this.trust = trust;
+        }
+    }
 }
