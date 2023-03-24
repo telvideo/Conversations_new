@@ -1,23 +1,14 @@
 package im.conversations.android.ui.fragment.main;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.paging.CombinedLoadStates;
-import androidx.paging.LoadState;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import im.conversations.android.R;
 import im.conversations.android.databinding.FragmentChatBinding;
 import im.conversations.android.ui.Activities;
@@ -26,13 +17,8 @@ import im.conversations.android.ui.RecyclerViewScroller;
 import im.conversations.android.ui.adapter.MessageAdapter;
 import im.conversations.android.ui.adapter.MessageComparator;
 import im.conversations.android.ui.model.ChatViewModel;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Objects;
 
 public class ChatFragment extends Fragment {
 
@@ -56,7 +42,7 @@ public class ChatFragment extends Fragment {
         this.binding.setChatViewModel(this.chatViewModel);
         this.binding.setLifecycleOwner(getViewLifecycleOwner());
         final var linearLayoutManager = new LinearLayoutManager(requireContext());
-        //linearLayoutManager.setStackFromEnd(true);
+        // linearLayoutManager.setStackFromEnd(true);
         linearLayoutManager.setReverseLayout(true);
         this.binding.messages.setLayoutManager(linearLayoutManager);
         this.recyclerViewScroller = new RecyclerViewScroller(this.binding.messages);
@@ -76,10 +62,10 @@ public class ChatFragment extends Fragment {
                     NavControllers.findNavController(requireActivity(), R.id.nav_host_fragment)
                             .popBackStack();
                 });
-        this.binding.addContent.setOnClickListener(v ->{
-            scrollToPosition(messageAdapter.getItemCount() - 1);
-
-        });
+        this.binding.addContent.setOnClickListener(
+                v -> {
+                    scrollToPosition(messageAdapter.getItemCount() - 1);
+                });
         this.binding.messageLayout.setEndIconOnClickListener(
                 v -> {
                     scrollToPosition(0);
@@ -89,8 +75,7 @@ public class ChatFragment extends Fragment {
     }
 
     private void scrollToPosition(final int position) {
-        LOGGER.info("scrollToPosition({})",position);
+        LOGGER.info("scrollToPosition({})", position);
         this.recyclerViewScroller.scrollToPosition(position);
     }
-
 }

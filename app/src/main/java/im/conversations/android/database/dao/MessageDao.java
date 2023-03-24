@@ -425,29 +425,57 @@ public abstract class MessageDao {
     @VisibleForTesting
     @Transaction
     @Query(
-            "SELECT message.id as"
-                + " id,sentAt,outgoing,toBare,toResource,fromBare,fromResource,modification,latestVersion"
-                + " as version,inReplyToMessageEntityId,encryption,message_version.identityKey,trust"
-                + " FROM chat JOIN message on message.chatId=chat.id JOIN message_version ON"
-                + " message.latestVersion=message_version.id LEFT JOIN axolotl_identity ON"
-                + " chat.accountId=axolotl_identity.accountId AND"
-                + " message.senderIdentity=axolotl_identity.address AND"
-                + " message_version.identityKey=axolotl_identity.identityKey WHERE chat.id=:chatId"
-                + " AND latestVersion IS NOT NULL ORDER BY message.receivedAt")
+            "SELECT c.accountId,m.id as id,type as"
+                + " chatType,sentAt,outgoing,toBare,toResource,fromBare,fromResource,senderIdentity"
+                + " as sender,(SELECT name FROM roster WHERE roster.accountId=c.accountId AND"
+                + " roster.address=m.senderIdentity) as senderRosterName,(SELECT nick FROM nick"
+                + " WHERE nick.accountId=c.accountId AND nick.address=m.senderIdentity) as"
+                + " senderNick,(SELECT vCardPhoto FROM presence WHERE accountId=c.accountId AND"
+                + " address=m.senderIdentity AND vCardPhoto NOT NULL LIMIT 1) as"
+                + " senderVcardPhoto,(SELECT thumb_id FROM avatar WHERE"
+                + " avatar.accountId=c.accountId AND avatar.address=m.senderIdentity) as"
+                + " senderAvatar,(CASE WHEN c.type IN ('MUC','MUC_PM') THEN (SELECT vCardPhoto FROM"
+                + " presence WHERE accountId=c.accountId AND address=c.address AND"
+                + " occupantId=m.occupantId AND vCardPhoto NOT NULL LIMIT 1) ELSE NULL END) as"
+                + " occupantVcardPhoto,modification,latestVersion as"
+                + " version,inReplyToMessageEntityId,encryption,message_version.identityKey,trust,(CASE"
+                + " WHEN c.type IN ('MUC','MUC_PM') THEN (SELECT count(distinct(df.feature)) == 2"
+                + " FROM disco_item di JOIN disco_feature df ON di.discoId = df.discoId WHERE"
+                + " di.address=c.address AND df.feature IN('muc_membersonly','muc_nonanonymous'))"
+                + " ELSE 0 END) as membersOnlyNonAnonymous FROM chat c JOIN message m on"
+                + " m.chatId=c.id JOIN message_version ON m.latestVersion=message_version.id LEFT"
+                + " JOIN axolotl_identity ON c.accountId=axolotl_identity.accountId AND"
+                + " m.senderIdentity=axolotl_identity.address AND"
+                + " message_version.identityKey=axolotl_identity.identityKey WHERE c.id=:chatId AND"
+                + " latestVersion IS NOT NULL ORDER BY m.receivedAt DESC")
     public abstract List<MessageWithContentReactions> getMessagesForTesting(long chatId);
 
     @Transaction
     @Query(
-            "SELECT message.id as"
-                    + " id,sentAt,outgoing,toBare,toResource,fromBare,fromResource,modification,latestVersion"
-                    + " as version,inReplyToMessageEntityId,encryption,message_version.identityKey,trust"
-                    + " FROM chat JOIN message on message.chatId=chat.id JOIN message_version ON"
-                    + " message.latestVersion=message_version.id LEFT JOIN axolotl_identity ON"
-                    + " chat.accountId=axolotl_identity.accountId AND"
-                    + " message.senderIdentity=axolotl_identity.address AND"
-                    + " message_version.identityKey=axolotl_identity.identityKey WHERE chat.id=:chatId"
-                    + " AND latestVersion IS NOT NULL ORDER BY message.receivedAt DESC")
-    public abstract PagingSource<Integer,MessageWithContentReactions> getMessages(long chatId);
+            "SELECT c.accountId,m.id as id,type as"
+                + " chatType,sentAt,outgoing,toBare,toResource,fromBare,fromResource,senderIdentity"
+                + " as sender,(SELECT name FROM roster WHERE roster.accountId=c.accountId AND"
+                + " roster.address=m.senderIdentity) as senderRosterName,(SELECT nick FROM nick"
+                + " WHERE nick.accountId=c.accountId AND nick.address=m.senderIdentity) as"
+                + " senderNick,(SELECT vCardPhoto FROM presence WHERE accountId=c.accountId AND"
+                + " address=m.senderIdentity AND vCardPhoto NOT NULL LIMIT 1) as"
+                + " senderVcardPhoto,(SELECT thumb_id FROM avatar WHERE"
+                + " avatar.accountId=c.accountId AND avatar.address=m.senderIdentity) as"
+                + " senderAvatar,(CASE WHEN c.type IN ('MUC','MUC_PM') THEN (SELECT vCardPhoto FROM"
+                + " presence WHERE accountId=c.accountId AND address=c.address AND"
+                + " occupantId=m.occupantId AND vCardPhoto NOT NULL LIMIT 1) ELSE NULL END) as"
+                + " occupantVcardPhoto,modification,latestVersion as"
+                + " version,inReplyToMessageEntityId,encryption,message_version.identityKey,trust,(CASE"
+                + " WHEN c.type IN ('MUC','MUC_PM') THEN (SELECT count(distinct(df.feature)) == 2"
+                + " FROM disco_item di JOIN disco_feature df ON di.discoId = df.discoId WHERE"
+                + " di.address=c.address AND df.feature IN('muc_membersonly','muc_nonanonymous'))"
+                + " ELSE 0 END) as membersOnlyNonAnonymous FROM chat c JOIN message m on"
+                + " m.chatId=c.id JOIN message_version ON m.latestVersion=message_version.id LEFT"
+                + " JOIN axolotl_identity ON c.accountId=axolotl_identity.accountId AND"
+                + " m.senderIdentity=axolotl_identity.address AND"
+                + " message_version.identityKey=axolotl_identity.identityKey WHERE c.id=:chatId AND"
+                + " latestVersion IS NOT NULL ORDER BY m.receivedAt DESC")
+    public abstract PagingSource<Integer, MessageWithContentReactions> getMessages(long chatId);
 
     public void setInReplyTo(
             ChatIdentifier chat,

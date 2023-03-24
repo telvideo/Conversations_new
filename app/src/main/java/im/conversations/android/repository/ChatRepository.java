@@ -8,7 +8,6 @@ import im.conversations.android.database.model.ChatInfo;
 import im.conversations.android.database.model.ChatOverviewItem;
 import im.conversations.android.database.model.GroupIdentifier;
 import im.conversations.android.database.model.MessageWithContentReactions;
-
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

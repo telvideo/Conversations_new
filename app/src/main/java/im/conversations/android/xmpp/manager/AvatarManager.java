@@ -157,7 +157,8 @@ public class AvatarManager extends AbstractManager {
                     final var photo = vcard.getExtension(Photo.class);
                     final var binary = photo == null ? null : photo.getExtension(BinaryValue.class);
                     if (binary == null) {
-                        throw new IllegalStateException("vCard did not have embedded photo");
+                        throw new IllegalStateException(
+                                String.format("vCard for %s did not have embedded photo", address));
                     }
                     return binary.asBytes();
                 },

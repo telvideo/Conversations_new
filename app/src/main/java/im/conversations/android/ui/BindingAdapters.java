@@ -64,9 +64,7 @@ public class BindingAdapters {
             if (sameDay(instant, now) || now.minus(SIX_HOURS).isBefore(instant)) {
                 textView.setText(
                         DateUtils.formatDateTime(
-                                context,
-                                instant.toEpochMilli(),
-                                DateUtils.FORMAT_SHOW_TIME));
+                                context, instant.toEpochMilli(), DateUtils.FORMAT_SHOW_TIME));
             } else if (sameYear(instant, now) || now.minus(THREE_MONTH).isBefore(instant)) {
                 textView.setText(
                         DateUtils.formatDateTime(
@@ -90,16 +88,14 @@ public class BindingAdapters {
     @BindingAdapter("time")
     public static void setTime(final TextView textView, final Instant instant) {
         if (instant == null || instant.getEpochSecond() <= 0) {
-            textView.setVisibility(View.GONE);
+            textView.setVisibility(View.INVISIBLE);
         } else {
             final Context context = textView.getContext();
             final Instant now = Instant.now();
             textView.setVisibility(View.VISIBLE);
-                textView.setText(
-                        DateUtils.formatDateTime(
-                                context,
-                                instant.toEpochMilli(),
-                                DateUtils.FORMAT_SHOW_TIME));
+            textView.setText(
+                    DateUtils.formatDateTime(
+                            context, instant.toEpochMilli(), DateUtils.FORMAT_SHOW_TIME));
         }
     }
 

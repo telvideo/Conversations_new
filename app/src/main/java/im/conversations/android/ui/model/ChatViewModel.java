@@ -11,13 +11,9 @@ import androidx.paging.Pager;
 import androidx.paging.PagingConfig;
 import androidx.paging.PagingData;
 import androidx.paging.PagingLiveData;
-
 import im.conversations.android.database.model.ChatInfo;
-import im.conversations.android.database.model.ChatOverviewItem;
 import im.conversations.android.database.model.MessageWithContentReactions;
 import im.conversations.android.repository.ChatRepository;
-import kotlinx.coroutines.CoroutineScope;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,16 +33,18 @@ public class ChatViewModel extends AndroidViewModel {
                 Transformations.switchMap(
                         this.chatId,
                         chatId -> chatId == null ? null : chatRepository.getChatInfo(chatId));
-        final var messages = Transformations.switchMap(this.chatId, chatId -> {
-            final Pager<Integer, MessageWithContentReactions> pager =
-                    new Pager<>(
-                            new PagingConfig(30),
-                            () -> chatRepository.getMessages(chatId));
-            return PagingLiveData.getLiveData(pager);
-        });
-        final var  viewModelScope = ViewModelKt.getViewModelScope(this);
-        this.messages =  PagingLiveData.cachedIn(messages, viewModelScope);
-
+        final var messages =
+                Transformations.switchMap(
+                        this.chatId,
+                        chatId -> {
+                            final Pager<Integer, MessageWithContentReactions> pager =
+                                    new Pager<>(
+                                            new PagingConfig(30),
+                                            () -> chatRepository.getMessages(chatId));
+                            return PagingLiveData.getLiveData(pager);
+                        });
+        final var viewModelScope = ViewModelKt.getViewModelScope(this);
+        this.messages = PagingLiveData.cachedIn(messages, viewModelScope);
     }
 
     public void setChatId(final long chatId) {

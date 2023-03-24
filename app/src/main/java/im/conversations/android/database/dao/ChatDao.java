@@ -212,12 +212,12 @@ public abstract class ChatDao {
                 + " accountId=c.accountId AND address=c.address AND vCardPhoto NOT NULL LIMIT 1)"
                 + " ELSE NULL END) as vCardPhoto,(SELECT thumb_id FROM avatar WHERE"
                 + " avatar.accountId=c.accountId AND avatar.address=c.address) as avatar,(CASE WHEN"
-                + " c.type='MUC' THEN (SELECT count(distinct(df.feature)) == 2 FROM disco_item di"
-                + " JOIN disco_feature df ON di.discoId = df.discoId WHERE di.address=c.address AND"
-                + " df.feature IN('muc_membersonly','muc_nonanonymous')) ELSE 0 END) as"
-                + " membersOnlyNonAnonymous FROM CHAT c LEFT JOIN message m ON (m.id = (SELECT id"
-                + " FROM message WHERE chatId=c.id ORDER by receivedAt DESC LIMIT 1)) WHERE"
-                + " (:accountId IS NULL OR c.accountId=:accountId) AND (:groupId IS NULL OR"
+                + " c.type IN ('MUC','MUC_PM') THEN (SELECT count(distinct(df.feature)) == 2 FROM"
+                + " disco_item di JOIN disco_feature df ON di.discoId = df.discoId WHERE"
+                + " di.address=c.address AND df.feature IN('muc_membersonly','muc_nonanonymous'))"
+                + " ELSE 0 END) as membersOnlyNonAnonymous FROM CHAT c LEFT JOIN message m ON (m.id"
+                + " = (SELECT id FROM message WHERE chatId=c.id ORDER by receivedAt DESC LIMIT 1))"
+                + " WHERE (:accountId IS NULL OR c.accountId=:accountId) AND (:groupId IS NULL OR"
                 + " (c.address IN(SELECT roster.address FROM roster JOIN roster_group ON"
                 + " roster.id=roster_group.rosterItemId WHERE roster.accountId=c.accountId AND"
                 + " roster_group.groupId=:groupId) OR c.address IN(SELECT address FROM bookmark"
@@ -236,10 +236,11 @@ public abstract class ChatDao {
                 + " disco_item.accountId=c.accountId AND disco_item.address=c.address LIMIT 1) as"
                 + " discoIdentityName,(SELECT name FROM bookmark WHERE"
                 + " bookmark.accountId=c.accountId AND bookmark.address=c.address) as"
-                + " bookmarkName,(CASE WHEN c.type='MUC' THEN (SELECT count(distinct(df.feature))"
-                + " == 2 FROM disco_item di JOIN disco_feature df ON di.discoId = df.discoId WHERE"
-                + " di.address=c.address AND df.feature IN('muc_membersonly','muc_nonanonymous'))"
-                + " ELSE 0 END) as membersOnlyNonAnonymous FROM chat c WHERE c.id=:chatId")
+                + " bookmarkName,(CASE WHEN c.type IN ('MUC','MUC_PM') THEN (SELECT"
+                + " count(distinct(df.feature)) == 2 FROM disco_item di JOIN disco_feature df ON"
+                + " di.discoId = df.discoId WHERE di.address=c.address AND df.feature"
+                + " IN('muc_membersonly','muc_nonanonymous')) ELSE 0 END) as"
+                + " membersOnlyNonAnonymous FROM chat c WHERE c.id=:chatId")
     public abstract LiveData<ChatInfo> getChatInfo(final long chatId);
 
     public PagingSource<Integer, ChatOverviewItem> getChatOverview(final ChatFilter chatFilter) {

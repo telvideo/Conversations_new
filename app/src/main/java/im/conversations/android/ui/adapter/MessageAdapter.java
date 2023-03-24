@@ -3,33 +3,34 @@ package im.conversations.android.ui.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.paging.PagingDataAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
-
 import im.conversations.android.R;
 import im.conversations.android.database.model.MessageWithContentReactions;
 import im.conversations.android.databinding.ItemMessageReceivedBinding;
+import im.conversations.android.ui.AvatarFetcher;
 
-public class MessageAdapter extends PagingDataAdapter<MessageWithContentReactions, MessageAdapter.AbstractMessageViewHolder> {
+public class MessageAdapter
+        extends PagingDataAdapter<
+                MessageWithContentReactions, MessageAdapter.AbstractMessageViewHolder> {
 
-    public MessageAdapter(@NonNull DiffUtil.ItemCallback<MessageWithContentReactions> diffCallback) {
+    public MessageAdapter(
+            @NonNull DiffUtil.ItemCallback<MessageWithContentReactions> diffCallback) {
         super(diffCallback);
     }
 
     @NonNull
     @Override
-    public AbstractMessageViewHolder onCreateViewHolder(final @NonNull ViewGroup parent, final int viewType) {
+    public AbstractMessageViewHolder onCreateViewHolder(
+            final @NonNull ViewGroup parent, final int viewType) {
         final var layoutInflater = LayoutInflater.from(parent.getContext());
         if (viewType == 0) {
-            return new MessageReceivedViewHolder(DataBindingUtil.inflate(
-                    layoutInflater,
-                    R.layout.item_message_received,
-                    parent,
-                    false));
+            return new MessageReceivedViewHolder(
+                    DataBindingUtil.inflate(
+                            layoutInflater, R.layout.item_message_received, parent, false));
         }
         throw new IllegalArgumentException(String.format("viewType %d not implemented", viewType));
     }
@@ -41,6 +42,17 @@ public class MessageAdapter extends PagingDataAdapter<MessageWithContentReaction
             holder.setMessage(null);
         }
         holder.setMessage(message);
+        if (holder instanceof MessageReceivedViewHolder messageReceivedViewHolder) {
+            final var addressWithName = message == null ? null : message.getAddressWithName();
+            final var avatar = message == null ? null : message.getAvatar();
+            if (avatar != null) {
+                messageReceivedViewHolder.binding.avatar.setVisibility(View.VISIBLE);
+                AvatarFetcher.fetchInto(messageReceivedViewHolder.binding.avatar, avatar);
+            } else if (addressWithName != null) {
+                messageReceivedViewHolder.binding.avatar.setVisibility(View.VISIBLE);
+                AvatarFetcher.setDefault(messageReceivedViewHolder.binding.avatar, addressWithName);
+            }
+        }
     }
 
     protected abstract static class AbstractMessageViewHolder extends RecyclerView.ViewHolder {
@@ -55,7 +67,6 @@ public class MessageAdapter extends PagingDataAdapter<MessageWithContentReaction
     public static class MessageReceivedViewHolder extends AbstractMessageViewHolder {
 
         private final ItemMessageReceivedBinding binding;
-
 
         public MessageReceivedViewHolder(@NonNull ItemMessageReceivedBinding binding) {
             super(binding.getRoot());
