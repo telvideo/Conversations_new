@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
+import im.conversations.android.database.KnownSender;
 import im.conversations.android.database.entity.MessageContentEntity;
 import im.conversations.android.database.entity.MessageEntity;
 import im.conversations.android.database.entity.MessageReactionEntity;
@@ -22,7 +23,7 @@ import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.jid.parts.Resourcepart;
 import org.whispersystems.libsignal.IdentityKey;
 
-public class MessageWithContentReactions implements IndividualName {
+public class MessageWithContentReactions implements IndividualName, KnownSender {
 
     public long accountId;
 
@@ -40,8 +41,6 @@ public class MessageWithContentReactions implements IndividualName {
     public BareJid fromBare;
     public Resourcepart fromResource;
 
-    // TODO retrieve occupantResource (current resource inferred by occupant id)
-
     public BareJid sender;
     public String senderVcardPhoto;
     public String senderAvatar;
@@ -49,6 +48,7 @@ public class MessageWithContentReactions implements IndividualName {
     public String senderNick;
 
     public String occupantVcardPhoto;
+    public String occupantResource;
 
     public Modification modification;
     public long version;
@@ -98,7 +98,7 @@ public class MessageWithContentReactions implements IndividualName {
     }
 
     public AddressWithName getAddressWithName() {
-        if (isIndividual()) {
+        if (isKnownSender()) {
             return new AddressWithName(individualAddress(), individualName());
         } else {
             final Jid address = JidCreate.fullFrom(fromBare, fromResource);
@@ -112,7 +112,7 @@ public class MessageWithContentReactions implements IndividualName {
         if (address == null) {
             return null;
         }
-        if (isIndividual()) {
+        if (isKnownSender()) {
             if (this.senderAvatar != null) {
                 return new AvatarWithAccount(accountId, address, AvatarType.PEP, this.senderAvatar);
             }
@@ -126,13 +126,6 @@ public class MessageWithContentReactions implements IndividualName {
         }
 
         return null;
-    }
-
-    private boolean isIndividual() {
-        return chatType == ChatType.INDIVIDUAL
-                || (Arrays.asList(ChatType.MUC, ChatType.MUC_PM).contains(chatType)
-                        && membersOnlyNonAnonymous
-                        && sender != null);
     }
 
     @Override
@@ -150,7 +143,22 @@ public class MessageWithContentReactions implements IndividualName {
         return sender;
     }
 
-    public String getSender() {
+    @Override
+    public ChatType getChatType() {
+        return this.chatType;
+    }
+
+    @Override
+    public boolean isMembersOnlyNonAnonymous() {
+        return membersOnlyNonAnonymous;
+    }
+
+    @Override
+    public BareJid getSender() {
+        return this.sender;
+    }
+
+    public String getSenderName() {
         return this.fromResource == null ? null : fromResource.toString();
     }
 

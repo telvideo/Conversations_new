@@ -193,10 +193,10 @@ public abstract class ChatDao {
     protected abstract void deleteStatusCodes(final long chatId);
 
     // TODO select vCardPhoto for c.type='MUC_PM'
-    // TODO select real name for `sender` in membersOnlyNonAnonymous MUCs
     @Transaction
     @Query(
-            "SELECT c.id,c.accountId,c.address,c.type,m.sentAt,m.outgoing,m.latestVersion as"
+            "SELECT c.id,c.accountId,c.address,c.type,m.sentAt,m.senderIdentity as"
+                + " sender,m.outgoing,m.latestVersion as"
                 + " version,m.toBare,m.toResource,m.fromBare,m.fromResource,(SELECT count(id) FROM"
                 + " message WHERE chatId=c.id) as unread,(SELECT name FROM roster WHERE"
                 + " roster.accountId=c.accountId AND roster.address=c.address) as"
@@ -215,7 +215,10 @@ public abstract class ChatDao {
                 + " c.type IN ('MUC','MUC_PM') THEN (SELECT count(distinct(df.feature)) == 2 FROM"
                 + " disco_item di JOIN disco_feature df ON di.discoId = df.discoId WHERE"
                 + " di.address=c.address AND df.feature IN('muc_membersonly','muc_nonanonymous'))"
-                + " ELSE 0 END) as membersOnlyNonAnonymous FROM CHAT c LEFT JOIN message m ON (m.id"
+                + " ELSE 0 END) as membersOnlyNonAnonymous,(CASE WHEN  m.occupantId IS NOT NULL AND"
+                + " c.type IN ('MUC','MUC_PM') THEN (SELECT resource FROM presence WHERE"
+                + " accountId=c.accountId AND address=c.address AND occupantId=m.occupantId LIMIT"
+                + " 1) ELSE NULL END) as occupantResource FROM CHAT c LEFT JOIN message m ON (m.id"
                 + " = (SELECT id FROM message WHERE chatId=c.id ORDER by receivedAt DESC LIMIT 1))"
                 + " WHERE (:accountId IS NULL OR c.accountId=:accountId) AND (:groupId IS NULL OR"
                 + " (c.address IN(SELECT roster.address FROM roster JOIN roster_group ON"

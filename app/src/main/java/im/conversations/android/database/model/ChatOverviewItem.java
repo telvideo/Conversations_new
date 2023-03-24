@@ -6,7 +6,9 @@ import com.google.common.collect.Iterables;
 import im.conversations.android.database.entity.MessageContentEntity;
 import java.time.Instant;
 import java.util.List;
+import org.jxmpp.jid.BareJid;
 import org.jxmpp.jid.Jid;
+import org.jxmpp.jid.parts.Resourcepart;
 
 public class ChatOverviewItem extends ChatInfo {
 
@@ -20,10 +22,15 @@ public class ChatOverviewItem extends ChatInfo {
     public String toResource;
     public Jid fromBare;
     public String fromResource;
+
+    public BareJid sender;
+
     public long version;
 
     public String vCardPhoto;
     public String avatar;
+
+    public Resourcepart occupantResource;
 
     public int unread;
 
