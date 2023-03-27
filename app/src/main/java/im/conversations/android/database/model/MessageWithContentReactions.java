@@ -25,7 +25,8 @@ import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.jid.parts.Resourcepart;
 import org.whispersystems.libsignal.IdentityKey;
 
-public class MessageWithContentReactions implements IndividualName, KnownSender {
+public final class MessageWithContentReactions
+        implements IndividualName, KnownSender, MessageAdapterItem {
 
     public long accountId;
 

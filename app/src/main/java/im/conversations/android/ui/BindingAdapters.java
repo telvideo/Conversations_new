@@ -105,6 +105,29 @@ public class BindingAdapters {
         }
     }
 
+    @BindingAdapter("date")
+    public static void setDate(final TextView textView, final Instant instant) {
+        if (instant == null || instant.toEpochMilli() <= 0) {
+            textView.setVisibility(View.INVISIBLE);
+        } else {
+            final Context context = textView.getContext();
+            final Instant now = Instant.now();
+            if (sameYear(instant, now) || now.minus(THREE_MONTH).isBefore(instant)) {
+                textView.setVisibility(View.VISIBLE);
+                textView.setText(
+                        DateUtils.formatDateTime(
+                                context,
+                                instant.toEpochMilli(),
+                                DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR));
+            } else {
+                textView.setVisibility(View.VISIBLE);
+                textView.setText(
+                        DateUtils.formatDateTime(
+                                context, instant.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE));
+            }
+        }
+    }
+
     @BindingAdapter("android:text")
     public static void setSender(final TextView textView, final ChatOverviewItem.Sender sender) {
         if (sender == null) {
