@@ -1,5 +1,6 @@
 package im.conversations.android.database.model;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import im.conversations.android.transformer.MessageTransformation;
 import im.conversations.android.xmpp.model.error.Condition;
@@ -63,5 +64,22 @@ public class MessageState {
                 StateType.DISPLAYED,
                 null,
                 null);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MessageState that = (MessageState) o;
+        return Objects.equal(fromBare, that.fromBare)
+                && Objects.equal(fromResource, that.fromResource)
+                && type == that.type
+                && Objects.equal(errorCondition, that.errorCondition)
+                && Objects.equal(errorText, that.errorText);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(fromBare, fromResource, type, errorCondition, errorText);
     }
 }

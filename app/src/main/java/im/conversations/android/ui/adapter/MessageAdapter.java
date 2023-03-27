@@ -12,10 +12,14 @@ import im.conversations.android.R;
 import im.conversations.android.database.model.MessageWithContentReactions;
 import im.conversations.android.databinding.ItemMessageReceivedBinding;
 import im.conversations.android.ui.AvatarFetcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MessageAdapter
         extends PagingDataAdapter<
                 MessageWithContentReactions, MessageAdapter.AbstractMessageViewHolder> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageAdapter.class);
 
     public MessageAdapter(
             @NonNull DiffUtil.ItemCallback<MessageWithContentReactions> diffCallback) {
@@ -41,6 +45,7 @@ public class MessageAdapter
         if (message == null) {
             holder.setMessage(null);
         }
+        LOGGER.info("onBindViewHolder({})", message == null ? null : message.id);
         holder.setMessage(message);
         if (holder instanceof MessageReceivedViewHolder messageReceivedViewHolder) {
             final var addressWithName = message == null ? null : message.getAddressWithName();

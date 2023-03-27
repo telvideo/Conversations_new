@@ -3,6 +3,7 @@ package im.conversations.android.database.model;
 import androidx.room.Relation;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
+import im.conversations.android.database.KnownSender;
 import im.conversations.android.database.entity.MessageContentEntity;
 import java.time.Instant;
 import java.util.List;
@@ -10,7 +11,7 @@ import org.jxmpp.jid.BareJid;
 import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.parts.Resourcepart;
 
-public class ChatOverviewItem extends ChatInfo {
+public class ChatOverviewItem extends ChatInfo implements KnownSender {
 
     public long id;
 
@@ -24,6 +25,8 @@ public class ChatOverviewItem extends ChatInfo {
     public String fromResource;
 
     public BareJid sender;
+    public String senderNick;
+    public String senderRosterName;
 
     public long version;
 
@@ -45,17 +48,63 @@ public class ChatOverviewItem extends ChatInfo {
         return firstMessageContent == null ? null : firstMessageContent.body;
     }
 
-    public Sender getSender() {
+    @Override
+    public ChatType getChatType() {
+        return this.type;
+    }
+
+    @Override
+    public boolean isMembersOnlyNonAnonymous() {
+        return this.membersOnlyNonAnonymous;
+    }
+
+    @Override
+    public BareJid getSender() {
+        return this.sender;
+    }
+
+    public Sender getMessageSender() {
         if (outgoing) {
             return new SenderYou();
         } else if (type == ChatType.MUC) {
-            if (fromResource != null) {
-                return new SenderName(fromResource);
+            if (isKnownSender()) {
+                return new SenderName(individualName());
             } else {
-                return null;
+                if (occupantResource != null && occupantResource.length() > 0) {
+                    return new SenderName(occupantResource.toString());
+                }
+                if (fromResource != null && fromResource.length() > 0) {
+                    return new SenderName(fromResource.toString());
+                }
             }
+        }
+        return null;
+    }
+
+    @Override
+    public String individualRosterName() {
+        if (type == ChatType.INDIVIDUAL) {
+            return super.individualRosterName();
         } else {
-            return null;
+            return this.senderRosterName;
+        }
+    }
+
+    @Override
+    public String individualNick() {
+        if (type == ChatType.INDIVIDUAL) {
+            return super.individualNick();
+        } else {
+            return senderNick;
+        }
+    }
+
+    @Override
+    public BareJid individualAddress() {
+        if (type == ChatType.INDIVIDUAL) {
+            return super.individualAddress();
+        } else {
+            return this.sender;
         }
     }
 
@@ -88,23 +137,20 @@ public class ChatOverviewItem extends ChatInfo {
         if (o == null || getClass() != o.getClass()) return false;
         ChatOverviewItem that = (ChatOverviewItem) o;
         return id == that.id
-                && accountId == that.accountId
                 && outgoing == that.outgoing
                 && version == that.version
                 && unread == that.unread
-                && Objects.equal(address, that.address)
-                && type == that.type
                 && Objects.equal(sentAt, that.sentAt)
                 && Objects.equal(toBare, that.toBare)
                 && Objects.equal(toResource, that.toResource)
                 && Objects.equal(fromBare, that.fromBare)
                 && Objects.equal(fromResource, that.fromResource)
-                && Objects.equal(rosterName, that.rosterName)
-                && Objects.equal(nick, that.nick)
-                && Objects.equal(discoIdentityName, that.discoIdentityName)
-                && Objects.equal(bookmarkName, that.bookmarkName)
+                && Objects.equal(sender, that.sender)
+                && Objects.equal(senderNick, that.senderNick)
+                && Objects.equal(senderRosterName, that.senderRosterName)
                 && Objects.equal(vCardPhoto, that.vCardPhoto)
                 && Objects.equal(avatar, that.avatar)
+                && Objects.equal(occupantResource, that.occupantResource)
                 && Objects.equal(contents, that.contents);
     }
 
@@ -112,22 +158,19 @@ public class ChatOverviewItem extends ChatInfo {
     public int hashCode() {
         return Objects.hashCode(
                 id,
-                accountId,
-                address,
-                type,
                 sentAt,
                 outgoing,
                 toBare,
                 toResource,
                 fromBare,
                 fromResource,
+                sender,
+                senderNick,
+                senderRosterName,
                 version,
-                rosterName,
-                nick,
-                discoIdentityName,
-                bookmarkName,
                 vCardPhoto,
                 avatar,
+                occupantResource,
                 unread,
                 contents);
     }

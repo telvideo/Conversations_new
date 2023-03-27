@@ -1,6 +1,7 @@
 package im.conversations.android.database.model;
 
 import androidx.room.Relation;
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
@@ -48,7 +49,7 @@ public class MessageWithContentReactions implements IndividualName, KnownSender 
     public String senderNick;
 
     public String occupantVcardPhoto;
-    public String occupantResource;
+    public Resourcepart occupantResource;
 
     public Modification modification;
     public long version;
@@ -101,9 +102,13 @@ public class MessageWithContentReactions implements IndividualName, KnownSender 
         if (isKnownSender()) {
             return new AddressWithName(individualAddress(), individualName());
         } else {
-            final Jid address = JidCreate.fullFrom(fromBare, fromResource);
-            final String name = fromResource.toString();
-            return new AddressWithName(address, name);
+            final Jid address;
+            if (occupantResource != null && occupantResource.length() != 0) {
+                address = JidCreate.fullFrom(fromBare, occupantResource);
+            } else {
+                address = JidCreate.fullFrom(fromBare, fromResource);
+            }
+            return new AddressWithName(address, address.getResourceOrEmpty().toString());
         }
     }
 
@@ -159,7 +164,8 @@ public class MessageWithContentReactions implements IndividualName, KnownSender 
     }
 
     public String getSenderName() {
-        return this.fromResource == null ? null : fromResource.toString();
+        final var addressWithName = getAddressWithName();
+        return addressWithName.name;
     }
 
     public boolean isGroupChat() {
@@ -168,6 +174,72 @@ public class MessageWithContentReactions implements IndividualName, KnownSender 
 
     public EncryptionTuple getEncryption() {
         return new EncryptionTuple(this.encryption, this.trust);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MessageWithContentReactions that = (MessageWithContentReactions) o;
+        return accountId == that.accountId
+                && id == that.id
+                && membersOnlyNonAnonymous == that.membersOnlyNonAnonymous
+                && outgoing == that.outgoing
+                && version == that.version
+                && chatType == that.chatType
+                && Objects.equal(sentAt, that.sentAt)
+                && Objects.equal(toBare, that.toBare)
+                && Objects.equal(toResource, that.toResource)
+                && Objects.equal(fromBare, that.fromBare)
+                && Objects.equal(fromResource, that.fromResource)
+                && Objects.equal(sender, that.sender)
+                && Objects.equal(senderVcardPhoto, that.senderVcardPhoto)
+                && Objects.equal(senderAvatar, that.senderAvatar)
+                && Objects.equal(senderRosterName, that.senderRosterName)
+                && Objects.equal(senderNick, that.senderNick)
+                && Objects.equal(occupantVcardPhoto, that.occupantVcardPhoto)
+                && Objects.equal(occupantResource, that.occupantResource)
+                && modification == that.modification
+                && Objects.equal(inReplyToMessageEntityId, that.inReplyToMessageEntityId)
+                && encryption == that.encryption
+                && Objects.equal(identityKey, that.identityKey)
+                && trust == that.trust
+                && Objects.equal(inReplyTo, that.inReplyTo)
+                && Objects.equal(contents, that.contents)
+                && Objects.equal(reactions, that.reactions)
+                && Objects.equal(states, that.states);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(
+                accountId,
+                id,
+                chatType,
+                membersOnlyNonAnonymous,
+                sentAt,
+                outgoing,
+                toBare,
+                toResource,
+                fromBare,
+                fromResource,
+                sender,
+                senderVcardPhoto,
+                senderAvatar,
+                senderRosterName,
+                senderNick,
+                occupantVcardPhoto,
+                occupantResource,
+                modification,
+                version,
+                inReplyToMessageEntityId,
+                encryption,
+                identityKey,
+                trust,
+                inReplyTo,
+                contents,
+                reactions,
+                states);
     }
 
     public static class EncryptionTuple {

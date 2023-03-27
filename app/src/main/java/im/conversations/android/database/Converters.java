@@ -52,6 +52,7 @@ public final class Converters {
         return input == null ? null : JidCreate.fromOrThrowUnchecked(input);
     }
 
+    // TODO do we want to return null on null input?
     @TypeConverter
     public static Resourcepart toResourcePart(final String input) {
         return Strings.isNullOrEmpty(input)
