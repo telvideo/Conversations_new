@@ -39,7 +39,7 @@ public class ChatViewModel extends AndroidViewModel {
                         chatId -> {
                             final Pager<Integer, MessageWithContentReactions> pager =
                                     new Pager<>(
-                                            new PagingConfig(30),
+                                            new PagingConfig(50),
                                             () -> chatRepository.getMessages(chatId));
                             return PagingLiveData.getLiveData(pager);
                         });

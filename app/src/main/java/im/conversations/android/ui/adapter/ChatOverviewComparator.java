@@ -13,7 +13,6 @@ public class ChatOverviewComparator extends DiffUtil.ItemCallback<ChatOverviewIt
     @Override
     public boolean areItemsTheSame(
             @NonNull ChatOverviewItem oldItem, @NonNull ChatOverviewItem newItem) {
-        // LOGGER.info("areItemsTheSame({},{})", oldItem.id, newItem.id);
         return oldItem.id == newItem.id;
     }
 

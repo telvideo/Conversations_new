@@ -21,10 +21,10 @@ public class MessageComparator extends DiffUtil.ItemCallback<MessageWithContentR
     public boolean areContentsTheSame(
             @NonNull MessageWithContentReactions oldItem,
             @NonNull MessageWithContentReactions newItem) {
-        final var equals = oldItem.equals(newItem);
-        if (!equals) {
+        final var areContentsTheSame = oldItem.equals(newItem);
+        if (!areContentsTheSame) {
             LOGGER.info("Message {} got modified", oldItem.id);
         }
-        return false;
+        return areContentsTheSame;
     }
 }

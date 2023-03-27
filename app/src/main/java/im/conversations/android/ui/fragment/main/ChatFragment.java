@@ -53,10 +53,7 @@ public class ChatFragment extends Fragment {
                 .getMessages()
                 .observe(
                         getViewLifecycleOwner(),
-                        pagingData -> {
-                            LOGGER.info("submitData()");
-                            messageAdapter.submitData(getLifecycle(), pagingData);
-                        });
+                        pagingData -> messageAdapter.submitData(getLifecycle(), pagingData));
         this.binding.materialToolbar.setNavigationOnClickListener(
                 view -> {
                     NavControllers.findNavController(requireActivity(), R.id.nav_host_fragment)
