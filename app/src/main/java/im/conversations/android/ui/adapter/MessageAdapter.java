@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import im.conversations.android.R;
 import im.conversations.android.database.model.MessageWithContentReactions;
 import im.conversations.android.databinding.ItemMessageReceivedBinding;
+import im.conversations.android.databinding.ItemMessageSentBinding;
 import im.conversations.android.ui.AvatarFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,9 @@ public class MessageAdapter
         extends PagingDataAdapter<
                 MessageWithContentReactions, MessageAdapter.AbstractMessageViewHolder> {
 
+    private static final int VIEW_TYPE_RECEIVED = 0;
+    private static final int VIEW_TYPE_SENT = 1;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageAdapter.class);
 
     public MessageAdapter(
@@ -26,15 +30,29 @@ public class MessageAdapter
         super(diffCallback);
     }
 
+    @Override
+    public int getItemViewType(final int position) {
+        final var message = getItem(position);
+        if (message != null && message.outgoing) {
+            return VIEW_TYPE_SENT;
+        } else {
+            return VIEW_TYPE_RECEIVED;
+        }
+    }
+
     @NonNull
     @Override
     public AbstractMessageViewHolder onCreateViewHolder(
             final @NonNull ViewGroup parent, final int viewType) {
         final var layoutInflater = LayoutInflater.from(parent.getContext());
-        if (viewType == 0) {
+        if (viewType == VIEW_TYPE_RECEIVED) {
             return new MessageReceivedViewHolder(
                     DataBindingUtil.inflate(
                             layoutInflater, R.layout.item_message_received, parent, false));
+        } else if (viewType == VIEW_TYPE_SENT) {
+            return new MessageSentViewHolder(
+                    DataBindingUtil.inflate(
+                            layoutInflater, R.layout.item_message_sent, parent, false));
         }
         throw new IllegalArgumentException(String.format("viewType %d not implemented", viewType));
     }
@@ -80,6 +98,21 @@ public class MessageAdapter
 
         @Override
         protected void setMessage(final MessageWithContentReactions message) {
+            this.binding.setMessage(message);
+        }
+    }
+
+    public static class MessageSentViewHolder extends AbstractMessageViewHolder {
+
+        private final ItemMessageSentBinding binding;
+
+        public MessageSentViewHolder(@NonNull ItemMessageSentBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
+
+        @Override
+        protected void setMessage(MessageWithContentReactions message) {
             this.binding.setMessage(message);
         }
     }

@@ -426,7 +426,7 @@ public abstract class MessageDao {
     @Transaction
     @Query(
             "SELECT c.accountId,m.id as id,type as"
-                + " chatType,sentAt,outgoing,toBare,toResource,fromBare,fromResource,senderIdentity"
+                + " chatType,sentAt,outgoing,toBare,toResource,fromBare,fromResource,acknowledged,senderIdentity"
                 + " as sender,(SELECT name FROM roster WHERE roster.accountId=c.accountId AND"
                 + " roster.address=m.senderIdentity) as senderRosterName,(SELECT nick FROM nick"
                 + " WHERE nick.accountId=c.accountId AND nick.address=m.senderIdentity) as"
@@ -456,7 +456,7 @@ public abstract class MessageDao {
     @Transaction
     @Query(
             "SELECT c.accountId,m.id as id,type as"
-                + " chatType,sentAt,outgoing,toBare,toResource,fromBare,fromResource,senderIdentity"
+                + " chatType,sentAt,outgoing,toBare,toResource,fromBare,fromResource,acknowledged,senderIdentity"
                 + " as sender,(SELECT name FROM roster WHERE roster.accountId=c.accountId AND"
                 + " roster.address=m.senderIdentity) as senderRosterName,(SELECT nick FROM nick"
                 + " WHERE nick.accountId=c.accountId AND nick.address=m.senderIdentity) as"

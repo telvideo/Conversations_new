@@ -3,6 +3,7 @@ package im.conversations.android.database.model;
 import androidx.room.Relation;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -53,6 +54,7 @@ public class MessageWithContentReactions implements IndividualName, KnownSender 
 
     public Modification modification;
     public long version;
+    public boolean acknowledged;
     public Long inReplyToMessageEntityId;
     public Encryption encryption;
     public IdentityKey identityKey;
@@ -176,6 +178,27 @@ public class MessageWithContentReactions implements IndividualName, KnownSender 
         return new EncryptionTuple(this.encryption, this.trust);
     }
 
+    public State getState() {
+        if (outgoing) {
+            final var status =
+                    Collections2.transform(
+                            Collections2.filter(
+                                    this.states, s -> s != null && s.fromBare.equals(toBare)),
+                            s -> s.type);
+            if (status.contains(StateType.DISPLAYED)) {
+                return State.READ;
+            } else if (status.contains(StateType.DELIVERED)) {
+                return State.DELIVERED;
+            } else if (acknowledged) {
+                return State.DELIVERED_TO_SERVER;
+            } else {
+                return State.NONE;
+            }
+        } else {
+            return State.NONE;
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -250,5 +273,13 @@ public class MessageWithContentReactions implements IndividualName, KnownSender 
             this.encryption = encryption;
             this.trust = trust;
         }
+    }
+
+    public enum State {
+        NONE,
+        DELIVERED_TO_SERVER,
+        DELIVERED,
+        READ,
+        ERROR
     }
 }

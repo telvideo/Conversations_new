@@ -6,9 +6,11 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.databinding.BindingAdapter;
 import androidx.lifecycle.LiveData;
+import com.google.android.material.color.MaterialColors;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.common.base.Supplier;
@@ -142,6 +144,39 @@ public class BindingAdapters {
             imageView.setVisibility(View.VISIBLE);
         } else {
             throw new IllegalArgumentException(String.format("Unknown encryption %s", encryption));
+        }
+    }
+
+    @BindingAdapter("state")
+    public static void setState(
+            final ImageView imageView, final MessageWithContentReactions.State state) {
+        if (state == null || state == MessageWithContentReactions.State.NONE) {
+            imageView.setVisibility(View.INVISIBLE);
+        } else {
+            @DrawableRes
+            final var drawableRes =
+                    switch (state) {
+                        case DELIVERED_TO_SERVER -> R.drawable.ic_check_24dp;
+                        case DELIVERED, READ -> R.drawable.ic_done_all_24dp;
+                        case ERROR -> R.drawable.ic_error_outline_24dp;
+                        default -> throw new IllegalArgumentException(
+                                String.format("State %s not implemented", state));
+                    };
+            imageView.setImageResource(drawableRes);
+            if (state == MessageWithContentReactions.State.READ) {
+                // the two color candidates are colorTertiary and colorPrimary
+                // depending on the exact color scheme one might 'pop' more than the other
+                imageView.setImageTintList(
+                        MaterialColors.getColorStateListOrNull(
+                                imageView.getContext(),
+                                com.google.android.material.R.attr.colorPrimary));
+            } else {
+                imageView.setImageTintList(
+                        MaterialColors.getColorStateListOrNull(
+                                imageView.getContext(),
+                                com.google.android.material.R.attr.colorOnSurface));
+            }
+            imageView.setVisibility(View.VISIBLE);
         }
     }
 }
