@@ -11,6 +11,9 @@ import androidx.paging.Pager;
 import androidx.paging.PagingConfig;
 import androidx.paging.PagingData;
 import androidx.paging.PagingLiveData;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import im.conversations.android.database.model.ChatInfo;
 import im.conversations.android.database.model.MessageWithContentReactions;
 import im.conversations.android.repository.ChatRepository;
@@ -25,6 +28,7 @@ public class ChatViewModel extends AndroidViewModel {
     private final MutableLiveData<Long> chatId = new MutableLiveData<>();
     private final LiveData<ChatInfo> chatInfo;
     private final LiveData<PagingData<MessageWithContentReactions>> messages;
+    private final MutableLiveData<Boolean> showDateSeparators = new MutableLiveData<>(true);
 
     public ChatViewModel(@NonNull Application application) {
         super(application);
@@ -58,5 +62,32 @@ public class ChatViewModel extends AndroidViewModel {
 
     public LiveData<PagingData<MessageWithContentReactions>> getMessages() {
         return this.messages;
+    }
+
+    public LiveData<Boolean> isShowDateSeparators() {
+        return this.showDateSeparators;
+    }
+
+    public void setShowDateSeparators(final boolean showDateSeparators) {
+        this.showDateSeparators.postValue(showDateSeparators);
+    }
+
+    public ListenableFuture<Integer> getMessagePosition(final long messageId) {
+        final Long chatId = this.chatId.getValue();
+        if (chatId == null) {
+            return Futures.immediateFailedFuture(
+                    new IllegalStateException("Chat id has not been configured yet"));
+        }
+        return Futures.transform(
+                this.chatRepository.getMessagePosition(chatId, messageId),
+                position -> {
+                    if (position == null) {
+                        throw new IllegalStateException(
+                                String.format(
+                                        "messageId %s is not part of chat %s", messageId, chatId));
+                    }
+                    return position;
+                },
+                MoreExecutors.directExecutor());
     }
 }

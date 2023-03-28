@@ -9,19 +9,20 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.PagingData;
-import androidx.paging.PagingDataTransforms;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import im.conversations.android.R;
-import im.conversations.android.database.model.MessageAdapterItem;
+import im.conversations.android.database.model.MessageWithContentReactions;
 import im.conversations.android.databinding.FragmentChatBinding;
 import im.conversations.android.ui.Activities;
 import im.conversations.android.ui.NavControllers;
 import im.conversations.android.ui.RecyclerViewScroller;
 import im.conversations.android.ui.adapter.MessageAdapter;
+import im.conversations.android.ui.adapter.MessageAdapterItems;
 import im.conversations.android.ui.adapter.MessageComparator;
 import im.conversations.android.ui.model.ChatViewModel;
-import java.time.temporal.ChronoUnit;
+import im.conversations.android.util.MainThreadExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,39 +55,10 @@ public class ChatFragment extends Fragment {
         this.messageAdapter = new MessageAdapter(new MessageComparator());
         this.binding.messages.setAdapter(this.messageAdapter);
 
+        this.chatViewModel.getMessages().observe(getViewLifecycleOwner(), this::submitPagingData);
         this.chatViewModel
-                .getMessages()
-                .observe(
-                        getViewLifecycleOwner(),
-                        pagingData -> {
-                            final PagingData<MessageAdapterItem> foo =
-                                    PagingDataTransforms.insertSeparators(
-                                            pagingData,
-                                            MoreExecutors.directExecutor(),
-                                            (before, after) -> {
-                                                final var dayBefore =
-                                                        before == null
-                                                                ? null
-                                                                : before.sentAt.truncatedTo(
-                                                                        ChronoUnit.DAYS);
-                                                final var dayAfter =
-                                                        after == null
-                                                                ? null
-                                                                : after.sentAt.truncatedTo(
-                                                                        ChronoUnit.DAYS);
-                                                if (dayAfter == null && dayBefore != null) {
-                                                    return new MessageAdapterItem
-                                                            .MessageDateSeparator(dayBefore);
-                                                } else if (dayBefore == null
-                                                        || dayBefore.equals(dayAfter)) {
-                                                    return null;
-                                                } else {
-                                                    return new MessageAdapterItem
-                                                            .MessageDateSeparator(dayBefore);
-                                                }
-                                            });
-                            messageAdapter.submitData(getLifecycle(), foo);
-                        });
+                .isShowDateSeparators()
+                .observe(getViewLifecycleOwner(), this::submitPagingData);
         this.binding.materialToolbar.setNavigationOnClickListener(
                 view -> {
                     NavControllers.findNavController(requireActivity(), R.id.nav_host_fragment)
@@ -94,18 +66,65 @@ public class ChatFragment extends Fragment {
                 });
         this.binding.addContent.setOnClickListener(
                 v -> {
-                    scrollToPosition(messageAdapter.getItemCount() - 1);
+                    scrollToMessageId(1039);
                 });
         this.binding.messageLayout.setEndIconOnClickListener(
                 v -> {
-                    scrollToPosition(0);
+                    this.scrollToPositionToEnd();
                 });
         Activities.setStatusAndNavigationBarColors(requireActivity(), binding.getRoot(), true);
         return this.binding.getRoot();
     }
 
-    private void scrollToPosition(final int position) {
-        LOGGER.info("scrollToPosition({})", position);
-        this.recyclerViewScroller.scrollToPosition(position);
+    private void submitPagingData(final Boolean isShowDateSeparators) {
+        final var pagingData = this.chatViewModel.getMessages().getValue();
+        if (pagingData == null) {
+            LOGGER.info("PagingData not ready");
+            return;
+        }
+        this.submitPagingData(pagingData, Boolean.TRUE.equals(isShowDateSeparators));
+    }
+
+    private void submitPagingData(final PagingData<MessageWithContentReactions> pagingData) {
+        submitPagingData(
+                pagingData,
+                Boolean.TRUE.equals(this.chatViewModel.isShowDateSeparators().getValue()));
+    }
+
+    private void submitPagingData(
+            final PagingData<MessageWithContentReactions> pagingData,
+            final boolean insertSeparators) {
+        if (insertSeparators) {
+            messageAdapter.submitData(
+                    getLifecycle(), MessageAdapterItems.insertSeparators(pagingData));
+        } else {
+            messageAdapter.submitData(getLifecycle(), MessageAdapterItems.of(pagingData));
+        }
+    }
+
+    private void scrollToPositionToEnd() {
+        this.recyclerViewScroller.scrollToPosition(0);
+    }
+
+    private void scrollToMessageId(final long messageId) {
+        LOGGER.info("scrollToMessageId({})", messageId);
+        this.chatViewModel.setShowDateSeparators(false);
+        final var future = this.chatViewModel.getMessagePosition(messageId);
+        Futures.addCallback(
+                future,
+                new FutureCallback<>() {
+                    @Override
+                    public void onSuccess(final @NonNull Integer position) {
+                        recyclerViewScroller.scrollToPosition(
+                                position, () -> chatViewModel.setShowDateSeparators(true));
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull final Throwable throwable) {
+                        LOGGER.info("Could not scroll to {}", messageId, throwable);
+                        chatViewModel.setShowDateSeparators(true);
+                    }
+                },
+                MainThreadExecutor.getInstance());
     }
 }

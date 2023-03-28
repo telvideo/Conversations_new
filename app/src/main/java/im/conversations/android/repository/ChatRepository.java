@@ -3,6 +3,7 @@ package im.conversations.android.repository;
 import android.content.Context;
 import androidx.lifecycle.LiveData;
 import androidx.paging.PagingSource;
+import com.google.common.util.concurrent.ListenableFuture;
 import im.conversations.android.database.model.ChatFilter;
 import im.conversations.android.database.model.ChatInfo;
 import im.conversations.android.database.model.ChatOverviewItem;
@@ -34,5 +35,9 @@ public class ChatRepository extends AbstractRepository {
 
     public PagingSource<Integer, MessageWithContentReactions> getMessages(final long chatId) {
         return this.database.messageDao().getMessages(chatId);
+    }
+
+    public ListenableFuture<Integer> getMessagePosition(final long chatId, final long messageId) {
+        return this.database.messageDao().getPosition(chatId, messageId);
     }
 }

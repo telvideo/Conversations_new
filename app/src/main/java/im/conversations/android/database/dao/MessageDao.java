@@ -11,6 +11,7 @@ import androidx.room.Update;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ListenableFuture;
 import im.conversations.android.database.entity.MessageContentEntity;
 import im.conversations.android.database.entity.MessageEntity;
 import im.conversations.android.database.entity.MessageReactionEntity;
@@ -480,8 +481,16 @@ public abstract class MessageDao {
                 + " JOIN axolotl_identity ON c.accountId=axolotl_identity.accountId AND"
                 + " m.senderIdentity=axolotl_identity.address AND"
                 + " message_version.identityKey=axolotl_identity.identityKey WHERE c.id=:chatId AND"
-                + " latestVersion IS NOT NULL ORDER BY m.receivedAt DESC")
+                + " latestVersion IS NOT NULL ORDER BY m.receivedAt DESC,m.id DESC")
     public abstract PagingSource<Integer, MessageWithContentReactions> getMessages(long chatId);
+
+    @Query(
+            "SELECT CASE WHEN (SELECT EXISTS(SELECT id FROM message WHERE chatId=:chatId AND"
+                + " id=:messageId)) THEN (SELECT count(id) FROM message WHERE chatId=:chatId AND"
+                + " (receivedAt > (SELECT receivedAt FROM message WHERE id=:messageId) OR"
+                + " (receivedAt=(SELECT receivedAt FROM message WHERE id=:messageId) AND id >"
+                + " :messageId))) ELSE NULL END")
+    public abstract ListenableFuture<Integer> getPosition(final long chatId, final long messageId);
 
     public void setInReplyTo(
             ChatIdentifier chat,

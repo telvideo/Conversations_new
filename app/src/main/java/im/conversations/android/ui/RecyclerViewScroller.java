@@ -19,8 +19,12 @@ public class RecyclerViewScroller {
     }
 
     public void scrollToPosition(final int position) {
+        this.scrollToPosition(position, null);
+    }
+
+    public void scrollToPosition(final int position, final Runnable onScrolledRunnable) {
         final ReliableScroller reliableScroller = new ReliableScroller(recyclerView);
-        reliableScroller.scrollToPosition(position);
+        reliableScroller.scrollToPosition(position, onScrolledRunnable);
     }
 
     private static class ReliableScroller {
@@ -36,7 +40,7 @@ public class RecyclerViewScroller {
             this.recyclerViewReference = new WeakReference<>(recyclerView);
         }
 
-        private void scrollToPosition(final int position) {
+        private void scrollToPosition(final int position, final Runnable onScrolledRunnable) {
             final var recyclerView = this.recyclerViewReference.get();
             if (recyclerView == null) {
                 return;
@@ -64,13 +68,16 @@ public class RecyclerViewScroller {
                     LOGGER.info("scrollToPosition({})", position);
                     recyclerView.scrollToPosition(position);
                 }
+                if (onScrolledRunnable != null) {
+                    recyclerView.post(onScrolledRunnable);
+                }
                 return;
             }
             recyclerView.scrollToPosition(position);
             accumulatedDelay += INTERVAL;
             recyclerView.postDelayed(
                     () -> {
-                        scrollToPosition(position);
+                        scrollToPosition(position, onScrolledRunnable);
                     },
                     INTERVAL);
         }
