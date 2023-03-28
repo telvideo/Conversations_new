@@ -93,7 +93,6 @@ public class MessageAdapter
         if (holder instanceof MessageReceivedViewHolder messageReceivedViewHolder) {
             final var addressWithName = message.getAddressWithName();
             final var avatar = message.getAvatar();
-            messageReceivedViewHolder.binding.avatar.setVisibility(View.VISIBLE);
             if (avatar != null) {
                 AvatarFetcher.fetchInto(messageReceivedViewHolder.binding.avatar, avatar);
             } else {

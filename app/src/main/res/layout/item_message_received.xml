@@ -9,6 +9,7 @@
         android:paddingVertical="6dp">
 
         <ImageView
+            android:visibility="@{message == null ? View.INVISIBLE : View.VISIBLE}"
             android:id="@+id/avatar"
             android:layout_width="@dimen/avatar_chat_overview_size"
             android:layout_height="@dimen/avatar_chat_overview_size"
