@@ -3,6 +3,7 @@ package im.conversations.android.transformer;
 import android.content.Context;
 import androidx.annotation.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import im.conversations.android.axolotl.AxolotlService;
 import im.conversations.android.database.ConversationsDatabase;
 import im.conversations.android.database.model.Account;
@@ -11,11 +12,13 @@ import im.conversations.android.database.model.MessageIdentifier;
 import im.conversations.android.database.model.MessageState;
 import im.conversations.android.database.model.Modification;
 import im.conversations.android.database.model.StanzaId;
+import im.conversations.android.xml.Namespace;
 import im.conversations.android.xmpp.Range;
 import im.conversations.android.xmpp.manager.ArchiveManager;
 import im.conversations.android.xmpp.model.DeliveryReceipt;
 import im.conversations.android.xmpp.model.axolotl.Encrypted;
 import im.conversations.android.xmpp.model.correction.Replace;
+import im.conversations.android.xmpp.model.fallback.Fallback;
 import im.conversations.android.xmpp.model.markers.Displayed;
 import im.conversations.android.xmpp.model.muc.user.MucUser;
 import im.conversations.android.xmpp.model.reactions.Reactions;
@@ -205,9 +208,22 @@ public class Transformer {
             if (Objects.nonNull(reply)
                     && Objects.nonNull(reply.getId())
                     && Objects.nonNull(reply.getTo())) {
+                final var fallback =
+                        Iterables.tryFind(
+                                        transformation.getExtensions(Fallback.class),
+                                        f -> Namespace.REPLY.equals(f.getFor()))
+                                .orNull();
+                final var fallbackBody = fallback == null ? null : fallback.getBody();
+                LOGGER.info("fallbacks {}", transformation.getExtensions(Fallback.class));
+                LOGGER.info("fallback body {}", fallbackBody);
                 database.messageDao()
                         .setInReplyTo(
-                                chat, messageIdentifier, messageType, reply.getTo(), reply.getId());
+                                chat,
+                                messageIdentifier,
+                                messageType,
+                                reply.getTo(),
+                                reply.getId(),
+                                fallbackBody);
             }
             return true;
         }

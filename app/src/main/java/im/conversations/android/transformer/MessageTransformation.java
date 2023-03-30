@@ -11,6 +11,7 @@ import im.conversations.android.xmpp.model.Extension;
 import im.conversations.android.xmpp.model.axolotl.Encrypted;
 import im.conversations.android.xmpp.model.correction.Replace;
 import im.conversations.android.xmpp.model.error.Error;
+import im.conversations.android.xmpp.model.fallback.Fallback;
 import im.conversations.android.xmpp.model.jabber.Body;
 import im.conversations.android.xmpp.model.jabber.Thread;
 import im.conversations.android.xmpp.model.markers.Displayed;
@@ -42,6 +43,7 @@ public class MessageTransformation extends Transformation {
                     Replace.class,
                     Reactions.class,
                     Reply.class,
+                    Fallback.class,
                     Retract.class);
 
     private final BareJid senderIdentity;

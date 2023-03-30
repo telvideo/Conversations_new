@@ -57,6 +57,8 @@ public final class MessageWithContentReactions
     public long version;
     public boolean acknowledged;
     public Long inReplyToMessageEntityId;
+    public int inReplyToFallbackStart;
+    public int inReplyToFallbackEnd;
     public Encryption encryption;
     public IdentityKey identityKey;
     public Trust trust;
@@ -95,8 +97,18 @@ public final class MessageWithContentReactions
     }
 
     public String textContent() {
-        final var content = Iterables.getFirst(this.contents, null);
-        return Strings.nullToEmpty(content == null ? null : content.body);
+        final var textContent =
+                Iterables.getFirst(
+                        Iterables.filter(this.contents, c -> c.type == PartType.TEXT), null);
+        final var body = Strings.nullToEmpty(textContent == null ? null : textContent.body);
+        ;
+        if (inReplyToMessageEntityId != null
+                && inReplyToFallbackEnd > inReplyToFallbackStart
+                && inReplyToFallbackEnd <= body.length()) {
+            return body.substring(0, inReplyToFallbackStart) + body.substring(inReplyToFallbackEnd);
+        } else {
+            return body;
+        }
     }
 
     public boolean hasPreview() {

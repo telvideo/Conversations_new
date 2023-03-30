@@ -71,6 +71,9 @@ public class MessageEntity {
     public String inReplyToStanzaId;
     @Nullable public Long inReplyToMessageEntityId;
 
+    public int inReplyToFallbackStart;
+    public int inReplyToFallbackEnd;
+
     public static MessageEntity of(final long chatId, final MessageTransformation transformation) {
         final var entity = new MessageEntity();
         entity.chatId = chatId;

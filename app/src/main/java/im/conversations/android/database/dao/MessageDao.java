@@ -26,6 +26,7 @@ import im.conversations.android.database.model.MessageWithContentReactions;
 import im.conversations.android.database.model.Modification;
 import im.conversations.android.transformer.MessageContentWrapper;
 import im.conversations.android.transformer.MessageTransformation;
+import im.conversations.android.xmpp.model.fallback.Body;
 import im.conversations.android.xmpp.model.reactions.Reactions;
 import im.conversations.android.xmpp.model.stanza.Message;
 import java.util.Collection;
@@ -442,7 +443,7 @@ public abstract class MessageDao {
                 + " c.type IN ('MUC','MUC_PM') THEN (SELECT resource FROM presence WHERE"
                 + " accountId=c.accountId AND address=c.address AND occupantId=m.occupantId LIMIT"
                 + " 1) ELSE NULL END) as occupantResource,modification,latestVersion as"
-                + " version,inReplyToMessageEntityId,encryption,message_version.identityKey,trust,(CASE"
+                + " version,inReplyToMessageEntityId,inReplyToFallbackStart,inReplyToFallbackEnd,encryption,message_version.identityKey,trust,(CASE"
                 + " WHEN c.type IN ('MUC','MUC_PM') THEN (SELECT count(distinct(df.feature)) == 2"
                 + " FROM disco_item di JOIN disco_feature df ON di.discoId = df.discoId WHERE"
                 + " di.address=c.address AND df.feature IN('muc_membersonly','muc_nonanonymous'))"
@@ -472,7 +473,7 @@ public abstract class MessageDao {
                 + " c.type IN ('MUC','MUC_PM') THEN (SELECT resource FROM presence WHERE"
                 + " accountId=c.accountId AND address=c.address AND occupantId=m.occupantId LIMIT"
                 + " 1) ELSE NULL END) as occupantResource,modification,latestVersion as"
-                + " version,inReplyToMessageEntityId,encryption,message_version.identityKey,trust,(CASE"
+                + " version,inReplyToMessageEntityId,inReplyToFallbackStart,inReplyToFallbackEnd,encryption,message_version.identityKey,trust,(CASE"
                 + " WHEN c.type IN ('MUC','MUC_PM') THEN (SELECT count(distinct(df.feature)) == 2"
                 + " FROM disco_item di JOIN disco_feature df ON di.discoId = df.discoId WHERE"
                 + " di.address=c.address AND df.feature IN('muc_membersonly','muc_nonanonymous'))"
@@ -493,17 +494,24 @@ public abstract class MessageDao {
     public abstract ListenableFuture<Integer> getPosition(final long chatId, final long messageId);
 
     public void setInReplyTo(
-            ChatIdentifier chat,
-            MessageIdentifier messageIdentifier,
-            Message.Type messageType,
+            final ChatIdentifier chat,
+            final MessageIdentifier messageIdentifier,
+            final Message.Type messageType,
             final Jid to,
-            String inReplyTo) {
+            final String inReplyTo,
+            final Body fallbackBody) {
         if (messageType == Message.Type.GROUPCHAT) {
             final Long messageEntityId = getMessageByStanzaId(chat.id, inReplyTo);
             setInReplyToStanzaId(messageIdentifier.id, inReplyTo, messageEntityId);
         } else {
             final Long messageEntityId = getMessageByMessageId(chat.id, to.asBareJid(), inReplyTo);
             setInReplyToMessageId(messageIdentifier.id, inReplyTo, messageEntityId);
+        }
+        final int inReplyToFallbackStart = fallbackBody == null ? 0 : fallbackBody.getStart();
+        final int inReplyToFallbackEnd = fallbackBody == null ? 0 : fallbackBody.getEnd();
+        if (inReplyToFallbackStart != 0 || inReplyToFallbackEnd != 0) {
+            setInReplyToFallback(
+                    messageIdentifier.id, inReplyToFallbackStart, inReplyToFallbackEnd);
         }
     }
 
@@ -520,6 +528,13 @@ public abstract class MessageDao {
                 + " WHERE id=:id")
     protected abstract void setInReplyToMessageId(
             final long id, String messageId, Long inReplyToMessageEntityId);
+
+    @Query(
+            "UPDATE message SET"
+                + " inReplyToFallbackStart=:inReplyToFallbackStart,inReplyToFallbackEnd=:inReplyToFallbackEnd"
+                + " WHERE id=:id")
+    protected abstract void setInReplyToFallback(
+            final long id, final int inReplyToFallbackStart, final int inReplyToFallbackEnd);
 
     @Query(
             "SELECT id FROM message WHERE chatId=:chatId AND fromBare=:fromBare AND"

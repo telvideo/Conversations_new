@@ -24,10 +24,12 @@ import im.conversations.android.xmpp.Range;
 import im.conversations.android.xmpp.XmppConnection;
 import im.conversations.android.xmpp.model.Extension;
 import im.conversations.android.xmpp.model.delay.Delay;
+import im.conversations.android.xmpp.model.fallback.Fallback;
 import im.conversations.android.xmpp.model.mam.Fin;
 import im.conversations.android.xmpp.model.mam.Query;
 import im.conversations.android.xmpp.model.mam.Result;
 import im.conversations.android.xmpp.model.muc.user.MucUser;
+import im.conversations.android.xmpp.model.reply.Reply;
 import im.conversations.android.xmpp.model.rsm.Set;
 import im.conversations.android.xmpp.model.stanza.Iq;
 import im.conversations.android.xmpp.model.stanza.Message;
@@ -92,6 +94,12 @@ public class ArchiveManager extends AbstractManager {
                             .hasFeature(Entity.discoItem(archive), Namespace.MUC)) {
                 privilegedExtensionBuilder.add(mucUser);
             }
+        }
+
+        if (forwardedMessage.hasExtension(Reply.class)) {
+            LOGGER.info(
+                    "message with reply hasFallback {}",
+                    forwardedMessage.hasExtension(Fallback.class));
         }
 
         final var transformation =

@@ -34,6 +34,7 @@ public final class Namespace {
     public static final String ENTITY_CAPABILITIES_2 = "urn:xmpp:caps";
     public static final String EXTERNAL_SERVICE_DISCOVERY = "urn:xmpp:extdisco:2";
     public static final String FAST = "urn:xmpp:fast:0";
+    public static final String FALLBACK = "urn:xmpp:fallback:0";
     public static final String FLEXIBLE_OFFLINE_MESSAGE_RETRIEVAL =
             "http://jabber.org/protocol/offline";
     public static final String FORWARD = "urn:xmpp:forward:0";
