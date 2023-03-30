@@ -123,6 +123,7 @@ public class MessageAdapter
         protected void setItem(final MessageAdapterItem item) {
             if (item instanceof MessageWithContentReactions message) {
                 this.binding.setMessage(message);
+                this.binding.content.setClipToOutline(true);
             } else {
                 this.binding.setMessage(null);
             }

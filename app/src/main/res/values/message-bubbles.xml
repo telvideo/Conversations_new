@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="message_bubble_corner_radius">16dp</dimen>
+    <dimen name="message_separator_corner_radius">8dp</dimen>
+    <dimen name="message_bubble_max_width">384dp</dimen>
+    <!-- The difference between bubble_max_width and preview_max_width will become relevant once we
+         support image and description in the same bubble. If there is no text, image bubbles will
+         always be restricted to max_preview_width. -->
+    <dimen name="message_preview_max_width">384dp</dimen>
+    <dimen name="message_preview_max_height">256dp</dimen>
+</resources>

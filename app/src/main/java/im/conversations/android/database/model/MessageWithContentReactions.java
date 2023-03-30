@@ -101,6 +101,10 @@ public final class MessageWithContentReactions
         // return text.substring(0,Math.min(text.length(),20));
     }
 
+    public boolean hasPreview() {
+        return Iterables.tryFind(this.contents, c -> c.type == PartType.FILE).isPresent();
+    }
+
     public AddressWithName getAddressWithName() {
         if (isKnownSender()) {
             return new AddressWithName(individualAddress(), individualName());
