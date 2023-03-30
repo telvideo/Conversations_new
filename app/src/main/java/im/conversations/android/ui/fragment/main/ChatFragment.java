@@ -53,6 +53,7 @@ public class ChatFragment extends Fragment {
         this.binding.messages.setLayoutManager(linearLayoutManager);
         this.recyclerViewScroller = new RecyclerViewScroller(this.binding.messages);
         this.messageAdapter = new MessageAdapter(new MessageComparator());
+        this.messageAdapter.setOnNavigateToInReplyTo(this::onNavigateToInReplyTo);
         this.binding.messages.setAdapter(this.messageAdapter);
 
         this.chatViewModel.getMessages().observe(getViewLifecycleOwner(), this::submitPagingData);
@@ -64,16 +65,16 @@ public class ChatFragment extends Fragment {
                     NavControllers.findNavController(requireActivity(), R.id.nav_host_fragment)
                             .popBackStack();
                 });
-        this.binding.addContent.setOnClickListener(
-                v -> {
-                    scrollToMessageId(1039);
-                });
         this.binding.messageLayout.setEndIconOnClickListener(
                 v -> {
                     this.scrollToPositionToEnd();
                 });
         Activities.setStatusAndNavigationBarColors(requireActivity(), binding.getRoot(), true);
         return this.binding.getRoot();
+    }
+
+    private void onNavigateToInReplyTo(long messageId) {
+        this.scrollToMessageId(messageId);
     }
 
     private void submitPagingData(final Boolean isShowDateSeparators) {

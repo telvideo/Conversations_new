@@ -34,6 +34,53 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="@dimen/message_bubble_max_width">
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/embeddedMessage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="?colorPrimaryContainer"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:padding="8dp"
+                android:visibility="@{message.hasInReplyTo ? View.VISIBLE : View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/embeddedMessageSender"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{message.inReplyToSender}"
+                    android:textAppearance="?textAppearanceTitleSmall"
+                    android:textColor="?colorOnPrimaryContainer"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Romeo Montague" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4sp"
+                    android:textAppearance="?textAppearanceLabelSmall"
+                    android:textColor="?colorOnPrimaryContainer"
+                    app:datetime="@{message.inReplyToSentAt}"
+                    app:layout_constraintBaseline_toBaselineOf="@+id/embeddedMessageSender"
+                    app:layout_constraintStart_toEndOf="@+id/embeddedMessageSender"
+                    tools:text="11:23 PM" />
+
+                <TextView
+                    android:id="@+id/embeddedMessageText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4sp"
+                    android:text="@{message.inReplyToTextContent}"
+                    android:textAppearance="?textAppearanceBodySmall"
+                    android:textColor="?colorOnPrimaryContainer"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/embeddedMessageSender"
+                    tools:text="In lorem orci, faucibus a magna a, auctor feugiat lorem. Sed efficitur turpis nisi, nec ultrices arcu tempus et. Nulla consectetur sodales tortor, at cursus erat ultricies non." />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <ImageView
                 android:id="@+id/image"
                 android:layout_width="wrap_content"
@@ -43,13 +90,14 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHeight_max="@dimen/message_preview_max_height"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/embeddedMessage"
                 app:layout_constraintWidth_max="@dimen/message_preview_max_width" />
 
             <LinearLayout
                 android:id="@+id/textContentWrapper"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:padding="8dp"
                 android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"

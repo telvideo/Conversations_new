@@ -96,13 +96,32 @@ public final class MessageWithContentReactions
 
     public String textContent() {
         final var content = Iterables.getFirst(this.contents, null);
-        final var text = Strings.nullToEmpty(content == null ? null : content.body);
-        return text;
-        // return text.substring(0,Math.min(text.length(),20));
+        return Strings.nullToEmpty(content == null ? null : content.body);
     }
 
     public boolean hasPreview() {
         return Iterables.tryFind(this.contents, c -> c.type == PartType.FILE).isPresent();
+    }
+
+    public boolean hasInReplyTo() {
+        return this.inReplyTo != null;
+    }
+
+    public Instant inReplyToSentAt() {
+        return this.inReplyTo == null ? null : this.inReplyTo.sentAt;
+    }
+
+    public String inReplyToSender() {
+        return this.inReplyTo == null ? null : this.inReplyTo.fromResource;
+    }
+
+    public String inReplyToTextContent() {
+        final var inReplyTo = this.inReplyTo;
+        if (inReplyTo == null) {
+            return null;
+        }
+        final var content = Iterables.getFirst(inReplyTo.contents, null);
+        return Strings.nullToEmpty(content == null ? null : content.body);
     }
 
     public AddressWithName getAddressWithName() {

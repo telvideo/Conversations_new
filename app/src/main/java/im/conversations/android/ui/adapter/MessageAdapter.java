@@ -15,6 +15,7 @@ import im.conversations.android.databinding.ItemMessageReceivedBinding;
 import im.conversations.android.databinding.ItemMessageSentBinding;
 import im.conversations.android.databinding.ItemMessageSeparatorBinding;
 import im.conversations.android.ui.AvatarFetcher;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,8 @@ public class MessageAdapter
     private static final int VIEW_TYPE_SEPARATOR = 2;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageAdapter.class);
+
+    private Consumer<Long> onNavigateToInReplyTo;
 
     public MessageAdapter(@NonNull DiffUtil.ItemCallback<MessageAdapterItem> diffCallback) {
         super(diffCallback);
@@ -90,7 +93,12 @@ public class MessageAdapter
             @NonNull AbstractMessageViewHolder holder,
             @NonNull final MessageWithContentReactions message) {
         holder.setItem(message);
+        final var inReplyTo = message.inReplyTo;
         if (holder instanceof MessageReceivedViewHolder messageReceivedViewHolder) {
+            if (inReplyTo != null) {
+                messageReceivedViewHolder.binding.embeddedMessage.setOnClickListener(
+                        view -> onNavigateToInReplyTo.accept(inReplyTo.id));
+            }
             final var addressWithName = message.getAddressWithName();
             final var avatar = message.getAvatar();
             if (avatar != null) {
@@ -98,7 +106,16 @@ public class MessageAdapter
             } else {
                 AvatarFetcher.setDefault(messageReceivedViewHolder.binding.avatar, addressWithName);
             }
+        } else if (holder instanceof MessageSentViewHolder messageSentViewHolder) {
+            if (inReplyTo != null) {
+                messageSentViewHolder.binding.embeddedMessage.setOnClickListener(
+                        view -> onNavigateToInReplyTo.accept(inReplyTo.id));
+            }
         }
+    }
+
+    public void setOnNavigateToInReplyTo(final Consumer<Long> consumer) {
+        this.onNavigateToInReplyTo = consumer;
     }
 
     protected abstract static class AbstractMessageViewHolder extends RecyclerView.ViewHolder {
