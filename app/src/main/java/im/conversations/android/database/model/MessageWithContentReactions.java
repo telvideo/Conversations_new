@@ -2,7 +2,6 @@ package im.conversations.android.database.model;
 
 import androidx.room.Relation;
 import com.google.common.base.Objects;
-import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
@@ -13,6 +12,7 @@ import im.conversations.android.database.entity.MessageContentEntity;
 import im.conversations.android.database.entity.MessageEntity;
 import im.conversations.android.database.entity.MessageReactionEntity;
 import im.conversations.android.database.entity.MessageStateEntity;
+import im.conversations.android.util.TextContents;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
@@ -97,18 +97,11 @@ public final class MessageWithContentReactions
     }
 
     public String textContent() {
-        final var textContent =
-                Iterables.getFirst(
-                        Iterables.filter(this.contents, c -> c.type == PartType.TEXT), null);
-        final var body = Strings.nullToEmpty(textContent == null ? null : textContent.body);
-        ;
-        if (inReplyToMessageEntityId != null
-                && inReplyToFallbackEnd > inReplyToFallbackStart
-                && inReplyToFallbackEnd <= body.length()) {
-            return body.substring(0, inReplyToFallbackStart) + body.substring(inReplyToFallbackEnd);
-        } else {
-            return body;
-        }
+        return TextContents.toText(
+                this.contents,
+                inReplyToMessageEntityId != null,
+                inReplyToFallbackStart,
+                inReplyToFallbackEnd);
     }
 
     public boolean hasPreview() {
@@ -143,8 +136,11 @@ public final class MessageWithContentReactions
         if (inReplyTo == null) {
             return null;
         }
-        final var content = Iterables.getFirst(inReplyTo.contents, null);
-        return Strings.nullToEmpty(content == null ? null : content.body);
+        return TextContents.toText(
+                inReplyTo.contents,
+                true,
+                inReplyTo.inReplyToFallbackStart,
+                inReplyTo.inReplyToFallbackEnd);
     }
 
     public AddressWithName getAddressWithName() {

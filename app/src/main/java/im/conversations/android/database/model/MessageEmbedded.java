@@ -16,6 +16,9 @@ public class MessageEmbedded {
 
     public Long latestVersion;
 
+    public int inReplyToFallbackStart;
+    public int inReplyToFallbackEnd;
+
     @Relation(
             entity = MessageContentEntity.class,
             parentColumn = "latestVersion",
