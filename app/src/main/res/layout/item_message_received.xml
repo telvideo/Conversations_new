@@ -44,7 +44,8 @@
                 android:visibility="@{message.hasInReplyTo ? View.VISIBLE : View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible">
 
                 <TextView
                     android:id="@+id/embeddedMessageSender"
@@ -86,12 +87,29 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
-                app:layout_constraintBottom_toTopOf="@+id/textContentWrapper"
+                android:visibility="@{message.hasPreview ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toTopOf="@+id/downloadButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHeight_max="@dimen/message_preview_max_height"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/embeddedMessage"
-                app:layout_constraintWidth_max="@dimen/message_preview_max_width" />
+                app:layout_constraintWidth_max="@dimen/message_preview_max_width"
+                tools:visibility="gone" />
+
+            <Button
+                android:id="@+id/downloadButton"
+                style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/check_x_filesize_on_host"
+                android:visibility="@{message.hasDownloadButton ? View.VISIBLE : View.GONE}"
+                app:icon="@drawable/ic_download_24dp"
+                app:layout_constraintBottom_toTopOf="@+id/textContentWrapper"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image"
+                tools:visibility="visible" />
 
             <LinearLayout
                 android:id="@+id/textContentWrapper"
@@ -99,11 +117,11 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="8dp"
-                android:visibility="visible"
+                android:visibility="@{message.hasTextContent ? View.VISIBLE : View.GONE}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/image">
+                app:layout_constraintTop_toBottomOf="@+id/downloadButton">
 
                 <TextView
                     android:id="@+id/textContent"
@@ -114,8 +132,6 @@
                     android:textColor="?colorOnSecondaryContainer"
                     tools:text="Quisque sit amet metus faucibus, egestas est eu, hendrerit mauris. Suspendisse pretium nisl purus, vitae vestibulum sapien rhoncus nec. Quisque molestie ante felis, vel dapibus ex mattis a. Morbi venenatis vestibulum neque, vel ornare sapien. Aliquam erat volutpat. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. " />
             </LinearLayout>
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 

@@ -15,6 +15,7 @@ import im.conversations.android.databinding.ItemMessageReceivedBinding;
 import im.conversations.android.databinding.ItemMessageSentBinding;
 import im.conversations.android.databinding.ItemMessageSeparatorBinding;
 import im.conversations.android.ui.AvatarFetcher;
+import im.conversations.android.ui.graphics.drawable.FlashBackgroundDrawable;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +94,11 @@ public class MessageAdapter
             @NonNull AbstractMessageViewHolder holder,
             @NonNull final MessageWithContentReactions message) {
         holder.setItem(message);
+        if (holder.itemView.getBackground() instanceof FlashBackgroundDrawable backgroundDrawable) {
+            if (backgroundDrawable.needsReset(message.id)) {
+                holder.itemView.setBackground(null);
+            }
+        }
         final var inReplyTo = message.inReplyTo;
         if (holder instanceof MessageReceivedViewHolder messageReceivedViewHolder) {
             if (inReplyTo != null) {

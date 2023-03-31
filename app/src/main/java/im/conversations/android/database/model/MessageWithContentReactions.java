@@ -115,12 +115,23 @@ public final class MessageWithContentReactions
         return Iterables.tryFind(this.contents, c -> c.type == PartType.FILE).isPresent();
     }
 
+    public boolean hasDownloadButton() {
+        return hasPreview();
+    }
+
+    public boolean hasTextContent() {
+        return Iterables.tryFind(this.contents, c -> c.type == PartType.TEXT).isPresent();
+    }
+
     public boolean hasInReplyTo() {
         return this.inReplyTo != null;
     }
 
-    public Instant inReplyToSentAt() {
-        return this.inReplyTo == null ? null : this.inReplyTo.sentAt;
+    public EmbeddedSentAt inReplyToSentAt() {
+        if (this.inReplyTo == null) {
+            return null;
+        }
+        return new EmbeddedSentAt(this.sentAt, this.inReplyTo.sentAt);
     }
 
     public String inReplyToSender() {
@@ -152,9 +163,6 @@ public final class MessageWithContentReactions
 
     public AvatarWithAccount getAvatar() {
         final var address = getAddressWithName();
-        if (address == null) {
-            return null;
-        }
         if (isKnownSender()) {
             if (this.senderAvatar != null) {
                 return new AvatarWithAccount(accountId, address, AvatarType.PEP, this.senderAvatar);
@@ -317,5 +325,15 @@ public final class MessageWithContentReactions
         DELIVERED,
         READ,
         ERROR
+    }
+
+    public static class EmbeddedSentAt {
+        public final Instant sentAt;
+        public final Instant embeddedSentAt;
+
+        public EmbeddedSentAt(Instant sentAt, Instant embeddedSentAt) {
+            this.sentAt = sentAt;
+            this.embeddedSentAt = embeddedSentAt;
+        }
     }
 }

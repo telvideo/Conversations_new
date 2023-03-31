@@ -64,30 +64,45 @@ public class BindingAdapters {
         if (instant == null || instant.getEpochSecond() <= 0) {
             textView.setVisibility(View.GONE);
         } else {
-            final Context context = textView.getContext();
-            final Instant now = Instant.now();
-            textView.setVisibility(View.VISIBLE);
-            if (sameDay(instant, now) || now.minus(SIX_HOURS).isBefore(instant)) {
-                textView.setText(
-                        DateUtils.formatDateTime(
-                                context, instant.toEpochMilli(), DateUtils.FORMAT_SHOW_TIME));
-            } else if (sameYear(instant, now) || now.minus(THREE_MONTH).isBefore(instant)) {
-                textView.setText(
-                        DateUtils.formatDateTime(
-                                context,
-                                instant.toEpochMilli(),
-                                DateUtils.FORMAT_SHOW_DATE
-                                        | DateUtils.FORMAT_NO_YEAR
-                                        | DateUtils.FORMAT_ABBREV_ALL));
-            } else {
-                textView.setText(
-                        DateUtils.formatDateTime(
-                                context,
-                                instant.toEpochMilli(),
-                                DateUtils.FORMAT_SHOW_DATE
-                                        | DateUtils.FORMAT_NO_MONTH_DAY
-                                        | DateUtils.FORMAT_ABBREV_ALL));
-            }
+            setDatetime(textView, Instant.now(), instant);
+        }
+    }
+
+    @BindingAdapter("datetime")
+    public static void setDatetime(
+            final TextView textView,
+            final MessageWithContentReactions.EmbeddedSentAt embeddedSentAt) {
+        if (embeddedSentAt == null || embeddedSentAt.embeddedSentAt.getEpochSecond() <= 0) {
+            textView.setVisibility(View.GONE);
+        } else {
+            setDatetime(textView, embeddedSentAt.sentAt, embeddedSentAt.embeddedSentAt);
+        }
+    }
+
+    private static void setDatetime(
+            final TextView textView, final Instant now, final Instant instant) {
+        final Context context = textView.getContext();
+        textView.setVisibility(View.VISIBLE);
+        if (sameDay(instant, now) || now.minus(SIX_HOURS).isBefore(instant)) {
+            textView.setText(
+                    DateUtils.formatDateTime(
+                            context, instant.toEpochMilli(), DateUtils.FORMAT_SHOW_TIME));
+        } else if (sameYear(instant, now) || now.minus(THREE_MONTH).isBefore(instant)) {
+            textView.setText(
+                    DateUtils.formatDateTime(
+                            context,
+                            instant.toEpochMilli(),
+                            DateUtils.FORMAT_SHOW_DATE
+                                    | DateUtils.FORMAT_NO_YEAR
+                                    | DateUtils.FORMAT_ABBREV_ALL));
+        } else {
+            textView.setText(
+                    DateUtils.formatDateTime(
+                            context,
+                            instant.toEpochMilli(),
+                            DateUtils.FORMAT_SHOW_DATE
+                                    | DateUtils.FORMAT_NO_MONTH_DAY
+                                    | DateUtils.FORMAT_ABBREV_ALL));
         }
     }
 

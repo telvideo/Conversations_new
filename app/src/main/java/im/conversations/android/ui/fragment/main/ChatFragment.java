@@ -21,6 +21,7 @@ import im.conversations.android.ui.RecyclerViewScroller;
 import im.conversations.android.ui.adapter.MessageAdapter;
 import im.conversations.android.ui.adapter.MessageAdapterItems;
 import im.conversations.android.ui.adapter.MessageComparator;
+import im.conversations.android.ui.graphics.drawable.FlashBackgroundDrawable;
 import im.conversations.android.ui.model.ChatViewModel;
 import im.conversations.android.util.MainThreadExecutor;
 import org.slf4j.Logger;
@@ -108,6 +109,7 @@ public class ChatFragment extends Fragment {
     }
 
     private void scrollToMessageId(final long messageId) {
+        // TODO do not scroll if view is fully visible
         LOGGER.info("scrollToMessageId({})", messageId);
         this.chatViewModel.setShowDateSeparators(false);
         final var future = this.chatViewModel.getMessagePosition(messageId);
@@ -117,7 +119,11 @@ public class ChatFragment extends Fragment {
                     @Override
                     public void onSuccess(final @NonNull Integer position) {
                         recyclerViewScroller.scrollToPosition(
-                                position, () -> chatViewModel.setShowDateSeparators(true));
+                                position,
+                                () -> {
+                                    chatViewModel.setShowDateSeparators(true);
+                                    flashBackgroundAtPosition(position, messageId);
+                                });
                     }
 
                     @Override
@@ -127,5 +133,16 @@ public class ChatFragment extends Fragment {
                     }
                 },
                 MainThreadExecutor.getInstance());
+    }
+
+    private void flashBackgroundAtPosition(final int position, final long messageId) {
+        final var layoutManager = this.binding.messages.getLayoutManager();
+        if (layoutManager instanceof LinearLayoutManager llm) {
+            final var view = llm.findViewByPosition(position);
+            if (view == null) {
+                return;
+            }
+            FlashBackgroundDrawable.flashBackground(view, messageId);
+        }
     }
 }
