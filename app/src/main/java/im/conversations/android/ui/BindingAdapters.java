@@ -10,6 +10,8 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.databinding.BindingAdapter;
 import androidx.lifecycle.LiveData;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.color.MaterialColors;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -24,6 +26,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 public class BindingAdapters {
 
@@ -215,6 +220,63 @@ public class BindingAdapters {
                                 com.google.android.material.R.attr.colorOnSurface));
             }
             imageView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @BindingAdapter("reactionsOnReceived")
+    public static void setReactionsOnReceived(
+            final ChipGroup chipGroup, final Set<Map.Entry<String, Integer>> reactions) {
+        setReactions(chipGroup, reactions, true);
+    }
+
+    @BindingAdapter("reactionsOnSent")
+    public static void setReactionsOnSent(
+            final ChipGroup chipGroup, final Set<Map.Entry<String, Integer>> reactions) {
+        setReactions(chipGroup, reactions, false);
+    }
+
+    private static void setReactions(
+            final ChipGroup chipGroup,
+            final Set<Map.Entry<String, Integer>> reactions,
+            final boolean onReceived) {
+        if (reactions == null || reactions.isEmpty()) {
+            chipGroup.setVisibility(View.GONE);
+        } else {
+            chipGroup.removeAllViews();
+            chipGroup.setVisibility(View.VISIBLE);
+            for (final Map.Entry<String, Integer> reaction : reactions) {
+                final var count = reaction.getValue();
+                final Chip chip = new Chip(chipGroup.getContext());
+                chip.setEnsureMinTouchTargetSize(false);
+                chip.setChipStartPadding(0.0f);
+                chip.setChipEndPadding(0.0f);
+                if (count == 1) {
+                    chip.setText(reaction.getKey());
+                } else {
+                    chip.setText(String.format(Locale.ENGLISH, "%s %d", reaction.getKey(), count));
+                }
+                chipGroup.addView(chip);
+            }
+            if (onReceived) {
+                final Chip chip = new Chip(chipGroup.getContext());
+                chip.setChipIconResource(R.drawable.ic_add_reaction_24dp);
+                chip.setChipStrokeColor(
+                        MaterialColors.getColorStateListOrNull(
+                                chipGroup.getContext(),
+                                com.google.android.material.R.attr.colorTertiary));
+                chip.setChipBackgroundColor(
+                        MaterialColors.getColorStateListOrNull(
+                                chipGroup.getContext(),
+                                com.google.android.material.R.attr.colorTertiaryContainer));
+                chip.setChipIconTint(
+                        MaterialColors.getColorStateListOrNull(
+                                chipGroup.getContext(),
+                                com.google.android.material.R.attr.colorOnTertiaryContainer));
+                chip.setEnsureMinTouchTargetSize(false);
+                chip.setTextEndPadding(0.0f);
+                chip.setTextStartPadding(0.0f);
+                chipGroup.addView(chip);
+            }
         }
     }
 }

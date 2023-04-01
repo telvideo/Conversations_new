@@ -123,17 +123,38 @@
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <Space
+            android:id="@+id/reactions_anchor"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="6dp"
+            app:layout_constraintBottom_toBottomOf="@+id/content"
+            app:layout_constraintEnd_toEndOf="@+id/content" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/reactions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:chipSpacingHorizontal="4dp"
+            app:layout_constraintEnd_toEndOf="@+id/content"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintTop_toBottomOf="@+id/reactions_anchor"
+            app:reactionsOnSent="@{message.aggregatedReactions}" />
 
         <TextView
             android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2sp"
+            android:layout_marginTop="2dp"
             android:layout_marginEnd="4sp"
             android:textAppearance="?textAppearanceLabelSmall"
             android:textColor="?colorOnSurface"
             app:layout_constraintEnd_toStartOf="@+id/encryption"
-            app:layout_constraintTop_toBottomOf="@+id/content"
+            app:layout_constraintTop_toBottomOf="@+id/reactions"
+            app:layout_goneMarginTop="8dp"
             app:time="@{message.sentAt}"
             tools:text="11:42 PM" />
 
