@@ -145,4 +145,18 @@ public class ChatFragment extends Fragment {
             FlashBackgroundDrawable.flashBackground(view, messageId);
         }
     }
+
+    @Override
+    public void onDestroyView() {
+        nullReferences();
+        super.onDestroyView();
+    }
+
+    private void nullReferences() {
+        this.binding.messages.setAdapter(null);
+        this.recyclerViewScroller = null;
+        this.messageAdapter.setOnNavigateToInReplyTo(null);
+        this.messageAdapter = null;
+        this.binding = null;
+    }
 }
