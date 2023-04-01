@@ -8,4 +8,5 @@
          always be restricted to max_preview_width. -->
     <dimen name="message_preview_max_width">384dp</dimen>
     <dimen name="message_preview_max_height">256dp</dimen>
+    <integer name="embedded_message_max_lines">3</integer>
 </resources>

@@ -43,8 +43,10 @@
                 android:padding="8dp"
                 android:visibility="@{message.hasInReplyTo ? View.VISIBLE : View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_min="wrap"
                 tools:visibility="visible">
 
                 <TextView
@@ -70,6 +72,8 @@
                     tools:text="11:23 PM" />
 
                 <TextView
+                    android:maxLines="@integer/embedded_message_max_lines"
+                    android:ellipsize="end"
                     android:id="@+id/embeddedMessageText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -120,6 +124,7 @@
                 android:visibility="@{message.hasTextContent ? View.VISIBLE : View.GONE}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/downloadButton">
 
