@@ -14,7 +14,7 @@ import androidx.room.PrimaryKey;
                         parentColumns = {"id"},
                         childColumns = {"discoId"},
                         onDelete = ForeignKey.CASCADE),
-        indices = {@Index(value = {"discoId"})})
+        indices = {@Index(value = {"discoId", "feature"})})
 public class DiscoFeatureEntity {
 
     @PrimaryKey(autoGenerate = true)

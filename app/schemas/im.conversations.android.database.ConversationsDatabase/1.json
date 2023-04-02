@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "a4cee026f132d06fdad6ff6db418d041",
+    "identityHash": "8be54d59ea976565ba5a4f7a9faf9109",
     "entities": [
       {
         "tableName": "account",
@@ -1436,13 +1436,14 @@
         },
         "indices": [
           {
-            "name": "index_disco_feature_discoId",
+            "name": "index_disco_feature_discoId_feature",
             "unique": false,
             "columnNames": [
-              "discoId"
+              "discoId",
+              "feature"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_disco_feature_discoId` ON `${TABLE_NAME}` (`discoId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_disco_feature_discoId_feature` ON `${TABLE_NAME}` (`discoId`, `feature`)"
           }
         ],
         "foreignKeys": [
@@ -2693,7 +2694,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a4cee026f132d06fdad6ff6db418d041')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8be54d59ea976565ba5a4f7a9faf9109')"
     ]
   }
 }
