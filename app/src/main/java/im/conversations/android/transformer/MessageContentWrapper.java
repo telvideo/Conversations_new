@@ -22,13 +22,22 @@ public class MessageContentWrapper {
 
     public static final MessageContentWrapper RETRACTION =
             new MessageContentWrapper(
-                    ImmutableList.of(new MessageContent(null, PartType.RETRACTION, null, null)),
+                    ImmutableList.of(
+                            new MessageContent(
+                                    null, PartType.RETRACTION, null, null, null, null, false)),
                     Encryption.CLEARTEXT,
                     null);
 
     private static final List<MessageContent> NOT_ENCRYPTED_FOR_THIS_DEVICE =
             ImmutableList.of(
-                    new MessageContent(null, PartType.NOT_ENCRYPTED_FOR_THIS_DEVICE, null, null));
+                    new MessageContent(
+                            null,
+                            PartType.NOT_ENCRYPTED_FOR_THIS_DEVICE,
+                            null,
+                            null,
+                            null,
+                            null,
+                            false));
 
     public final List<MessageContent> contents;
     public final Encryption encryption;
@@ -104,8 +113,11 @@ public class MessageContentWrapper {
                             new MessageContent(
                                     null,
                                     PartType.DECRYPTION_FAILURE,
+                                    null,
+                                    null,
                                     exceptionToMessage(cause),
-                                    null)),
+                                    null,
+                                    false)),
                     Encryption.FAILURE,
                     null);
         }

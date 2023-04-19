@@ -16,7 +16,8 @@ public final class TextContents {
             final boolean removeFallback,
             final int inReplyToFallbackStart,
             final int inReplyToFallbackEnd) {
-        final var textContents = Collections2.filter(messageContents, c -> c.type == PartType.TEXT);
+        final var textContents =
+                Collections2.filter(messageContents, c -> c.partType == PartType.TEXT);
         if (textContents.size() == 1 && removeFallback) {
             final String body = Strings.nullToEmpty(Iterables.getOnlyElement(textContents).body);
             if (inReplyToFallbackEnd > inReplyToFallbackStart

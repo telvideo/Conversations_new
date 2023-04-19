@@ -5,6 +5,7 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import com.google.common.net.MediaType;
 import im.conversations.android.database.model.MessageContent;
 import im.conversations.android.database.model.PartType;
 
@@ -26,20 +27,27 @@ public class MessageContentEntity {
 
     public String language;
 
-    public PartType type;
+    public PartType partType;
+    public MediaType mediaType;
+    public Long size;
 
     public String body;
 
     public String url;
+
+    public boolean cached;
 
     public static MessageContentEntity of(
             final long messageVersionId, final MessageContent content) {
         final var entity = new MessageContentEntity();
         entity.messageVersionId = messageVersionId;
         entity.language = content.language;
-        entity.type = content.type;
+        entity.partType = content.partType;
+        entity.mediaType = content.mediaType;
+        entity.size = content.size;
         entity.body = content.body;
         entity.url = content.url;
+        entity.cached = content.cached;
         return entity;
     }
 }

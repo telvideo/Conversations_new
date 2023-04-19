@@ -105,7 +105,7 @@ public final class MessageWithContentReactions
     }
 
     public boolean hasPreview() {
-        return Iterables.tryFind(this.contents, c -> c.type == PartType.FILE).isPresent();
+        return Iterables.tryFind(this.contents, c -> c.partType == PartType.FILE).isPresent();
     }
 
     public boolean hasDownloadButton() {
@@ -113,7 +113,7 @@ public final class MessageWithContentReactions
     }
 
     public boolean hasTextContent() {
-        return Iterables.tryFind(this.contents, c -> c.type == PartType.TEXT).isPresent();
+        return Iterables.tryFind(this.contents, c -> c.partType == PartType.TEXT).isPresent();
     }
 
     public boolean hasInReplyTo() {

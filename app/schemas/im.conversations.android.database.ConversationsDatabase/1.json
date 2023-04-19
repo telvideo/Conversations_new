@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "8be54d59ea976565ba5a4f7a9faf9109",
+    "identityHash": "77c7c4ba9aae53855e38b8ce967e2668",
     "entities": [
       {
         "tableName": "account",
@@ -1947,7 +1947,7 @@
       },
       {
         "tableName": "message_content",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `messageVersionId` INTEGER NOT NULL, `language` TEXT, `type` TEXT, `body` TEXT, `url` TEXT, FOREIGN KEY(`messageVersionId`) REFERENCES `message_version`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `messageVersionId` INTEGER NOT NULL, `language` TEXT, `partType` TEXT, `mediaType` TEXT, `size` INTEGER, `body` TEXT, `url` TEXT, `cached` INTEGER NOT NULL, FOREIGN KEY(`messageVersionId`) REFERENCES `message_version`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -1968,9 +1968,21 @@
             "notNull": false
           },
           {
-            "fieldPath": "type",
-            "columnName": "type",
+            "fieldPath": "partType",
+            "columnName": "partType",
             "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "mediaType",
+            "columnName": "mediaType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "size",
+            "columnName": "size",
+            "affinity": "INTEGER",
             "notNull": false
           },
           {
@@ -1984,6 +1996,12 @@
             "columnName": "url",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "cached",
+            "columnName": "cached",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -2694,7 +2712,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8be54d59ea976565ba5a4f7a9faf9109')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '77c7c4ba9aae53855e38b8ce967e2668')"
     ]
   }
 }

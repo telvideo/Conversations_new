@@ -516,7 +516,8 @@ public class MessageTransformationTest extends BaseTransformationTest {
         final var messages = database.messageDao().getMessagesForTesting(1L);
         final var message = Iterables.getOnlyElement(messages);
         Assert.assertEquals(Modification.RETRACTION, message.modification);
-        Assert.assertEquals(PartType.RETRACTION, Iterables.getOnlyElement(message.contents).type);
+        Assert.assertEquals(
+                PartType.RETRACTION, Iterables.getOnlyElement(message.contents).partType);
     }
 
     @Test

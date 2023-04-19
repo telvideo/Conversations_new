@@ -2,6 +2,7 @@ package im.conversations.android.database;
 
 import androidx.room.TypeConverter;
 import com.google.common.base.Strings;
+import com.google.common.net.MediaType;
 import de.measite.minidns.DNSName;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -175,5 +176,15 @@ public final class Converters {
         } catch (final UnknownHostException e) {
             return null;
         }
+    }
+
+    @TypeConverter
+    public static String fromMediaType(final MediaType mediaType) {
+        return mediaType == null ? null : mediaType.toString();
+    }
+
+    @TypeConverter
+    public static MediaType toMediaType(final String mediaType) {
+        return mediaType == null ? null : MediaType.parse(mediaType);
     }
 }
