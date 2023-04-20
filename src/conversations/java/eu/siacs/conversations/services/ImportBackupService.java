@@ -273,7 +273,7 @@ public class ImportBackupService extends Service {
                 return false;
             }
 
-            final byte[] key = ExportBackupService.getKey(password, backupFileHeader.getSalt());
+            final byte[] key = ExportBackupTask.getKey(password, backupFileHeader.getSalt());
 
             final AEADBlockCipher cipher = new GCMBlockCipher(new AESEngine());
             cipher.init(

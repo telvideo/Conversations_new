@@ -119,6 +119,9 @@
             android:name=".services.ExportBackupService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+        <service
+            android:name=".services.ExportBackupJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <service
             android:name=".services.ImportBackupService"

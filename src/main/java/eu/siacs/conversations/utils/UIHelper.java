@@ -37,7 +37,7 @@ import eu.siacs.conversations.entities.MucOptions;
 import eu.siacs.conversations.entities.Presence;
 import eu.siacs.conversations.entities.RtpSessionStatus;
 import eu.siacs.conversations.entities.Transferable;
-import eu.siacs.conversations.services.ExportBackupService;
+import eu.siacs.conversations.services.ExportBackupTask;
 import eu.siacs.conversations.ui.util.QuoteHelper;
 import eu.siacs.conversations.xmpp.Jid;
 
@@ -410,7 +410,7 @@ public class UIHelper {
             return context.getString(R.string.pdf_document);
         } else if (mime.equals("application/vnd.android.package-archive")) {
             return context.getString(R.string.apk);
-        } else if (mime.equals(ExportBackupService.MIME_TYPE)) {
+        } else if (mime.equals(ExportBackupTask.MIME_TYPE)) {
             return context.getString(R.string.conversations_backup);
         } else if (mime.contains("vcard")) {
             return context.getString(R.string.vcard);
