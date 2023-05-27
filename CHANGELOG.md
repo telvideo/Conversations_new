@@ -1,5 +1,15 @@
 # Changelog
 
+### Version 2.12.4
+
+* Revert Target SDK bump (back to 32) to fix various issues on Android 13
+
+### Version 2.12.3
+
+* Improve support for new emojis
+* Add ability to remove account from server
+* Show timestamp for calls
+
 ### Version 2.12.2
 
 * Increase corner radius on profile pictures
