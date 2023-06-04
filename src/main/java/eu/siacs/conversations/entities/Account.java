@@ -309,7 +309,7 @@ public class Account extends AbstractEntity implements AvatarService.Avatarable 
 
     public boolean isOnion() {
         final String server = getServer();
-        return server != null && server.endsWith(".onion");
+        return server != null && server.endsWith(".onion") && getHostname().isEmpty();
     }
 
     public int getPort() {
