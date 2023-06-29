@@ -114,6 +114,8 @@
                 <action android:name="org.unifiedpush.android.distributor.REGISTER" />
                 <action android:name="org.unifiedpush.android.distributor.UNREGISTER" />
                 <action android:name="org.unifiedpush.android.distributor.feature.BYTES_MESSAGE" />
+                <action android:name="org.unifiedpush.android.distributor.feature.MESSENGER" />
+                <action android:name="org.unifiedpush.android.distributor.feature.APP_VALIDATION" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
@@ -298,7 +300,7 @@
                 android:value="eu.siacs.conversations.ui.SettingsActivity" />
         </activity>
         <activity
-            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:name="com.canhub.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
         <activity android:name=".ui.MemorizingActivity" />
 
