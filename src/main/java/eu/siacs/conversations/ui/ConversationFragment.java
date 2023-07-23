@@ -1220,6 +1220,11 @@ public class ConversationFragment extends XmppFragment
         binding.textinput.setRichContentListener(new String[] {"image/*"}, mEditorContentListener);
 
         binding.textSendButton.setOnClickListener(this.mSendButtonListener);
+        binding.requestVoice.setOnClickListener((v) -> {
+            activity.xmppConnectionService.requestVoice(conversation.getAccount(), conversation.getJid());
+            binding.requestVoice.setVisibility(View.GONE);
+            Toast.makeText(activity, R.string.request_to_speak_sent, Toast.LENGTH_SHORT).show();
+        });
 
         binding.scrollToBottomButton.setOnClickListener(this.mScrollButtonListener);
         binding.messagesView.setOnScrollListener(mOnScrollListener);
@@ -2886,7 +2891,8 @@ public class ConversationFragment extends XmppFragment
                         || this.conversation.getNextCounterpart() != null;
         this.binding.textinput.setFocusable(canWrite);
         this.binding.textinput.setFocusableInTouchMode(canWrite);
-        this.binding.textSendButton.setEnabled(canWrite);
+        this.binding.textSendButton.setVisibility(canWrite ? View.VISIBLE : View.GONE);
+        this.binding.requestVoice.setVisibility(canWrite ? View.GONE : View.VISIBLE);
         this.binding.textinput.setCursorVisible(canWrite);
         this.binding.textinput.setEnabled(canWrite);
     }

@@ -18,6 +18,7 @@ import eu.siacs.conversations.xml.Element;
 import eu.siacs.conversations.xml.Namespace;
 import eu.siacs.conversations.xmpp.Jid;
 import eu.siacs.conversations.xmpp.chatstate.ChatState;
+import eu.siacs.conversations.xmpp.forms.Data;
 import eu.siacs.conversations.xmpp.jingle.JingleConnectionManager;
 import eu.siacs.conversations.xmpp.jingle.JingleRtpConnection;
 import eu.siacs.conversations.xmpp.jingle.Media;
@@ -173,6 +174,18 @@ public class MessageGenerator extends AbstractGenerator {
         packet.setTo(conversation.getJid().asBareJid());
         packet.addChild("subject").setContent(subject);
         packet.setFrom(conversation.getAccount().getJid().asBareJid());
+        return packet;
+    }
+
+    public im.conversations.android.xmpp.model.stanza.Message requestVoice(Jid jid) {
+        im.conversations.android.xmpp.model.stanza.Message packet = new im.conversations.android.xmpp.model.stanza.Message();
+        packet.setType(im.conversations.android.xmpp.model.stanza.Message.Type.NORMAL);
+        packet.setTo(jid.asBareJid());
+        final var form = new Data();
+        form.setFormType("http://jabber.org/protocol/muc#request");
+        form.put("muc#role", "participant");
+        form.submit();
+        packet.addChild(form);
         return packet;
     }
 

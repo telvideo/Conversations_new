@@ -1063,4 +1063,6 @@
     <string name="pref_fullscreen_notification_summary">Allow this app to show incoming call notifications that take up the full screen when the device is locked.</string>
     <string name="unsupported_operation">Unsupported operation</string>
     <string name="allow_private_messages">Allow private messages</string>
+    <string name="request_to_speak">Request to speak</string>
+    <string name="request_to_speak_sent">Your request has been sent to the moderators</string>>
 </resources>

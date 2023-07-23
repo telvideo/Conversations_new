@@ -122,6 +122,19 @@
                 android:contentDescription="@string/send_message"
                 app:icon="@drawable/ic_send_24dp"
                 app:iconSize="32dp" />
+
+            <com.google.android.material.button.MaterialButton
+                style="?attr/materialIconButtonFilledTonalStyle"
+                android:id="@+id/request_voice"
+                android:layout_toEndOf="@+id/input_layout"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:text="@string/request_to_speak" />
+
         </RelativeLayout>
 
         <RelativeLayout
