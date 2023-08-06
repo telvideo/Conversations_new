@@ -1,2 +1,0 @@
-* Security: Stop downloading files that exceed advertised file size
-* Security: Limit POSH files to 10K
