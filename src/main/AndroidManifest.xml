@@ -53,6 +53,8 @@
     <queries>
         <package android:name="org.sufficientlysecure.keychain" />
         <package android:name="org.torproject.android" />
+        <package android:name="org.purplei2p.i2pd" />
+        <package android:name="net.i2p.android.router" />
 
         <intent>
             <action android:name="eu.siacs.conversations.location.request" />

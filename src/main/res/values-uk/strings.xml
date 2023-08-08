@@ -447,6 +447,7 @@
     <string name="download_failed_could_not_connect">Звантаження не вдалося: неможливо з\'єднатися з вузлом</string>
     <string name="download_failed_could_not_write_file">Завантаження не вдалося: неможливо записати файл</string>
     <string name="account_status_tor_unavailable">Мережа ToR не доступна</string>
+    <string name="account_status_i2p_unavailable">Мережа I2P не доступна</string>
     <string name="account_status_bind_failure">Прив\'язка не спрацювала</string>
     <string name="account_status_host_unknown">Сервер не відповідає за цей домен</string>
     <string name="server_info_broken">Поламано</string>
@@ -472,7 +473,18 @@
     <string name="pref_connection_options">З\'єднання</string>
     <string name="pref_use_tor">З\'єднання через ToR</string>
     <string name="pref_use_tor_summary">Тунелювати всі з\'єднання через мережу Tor. Потребує Orbot</string>
-    <string name="account_settings_hostname">Назва вузла</string>
+    <string name="install_i2p_">Встановити I2P(D)</string>
+    <string name="start_i2pd">Запустити I2PD</string>
+    <string name="start_i2p">Запустити I2P</string>
+    <string name="check_i2p_tunnel">використовуєм I2P прокси: %s://%s:%d</string>
+    <string name="pref_use_i2p_proxy_type">Тип прокси I2P</string>
+    <string name="pref_use_i2p_proxy_type_summary">Протокол проксі використовуємий для I2P з\'єднань</string>
+    <string name="pref_use_i2p_proxy_host">Ім\'я сервера проксі I2P</string>
+    <string name="pref_use_i2p_proxy_host_summary">Ім\'я сервера проксі використовуємоє для I2P з\'єднань</string>
+    <string name="pref_use_i2p_proxy_port">Порт проксі I2P</string>
+    <string name="pref_use_i2p_proxy_port_summary">Порт проксі використовуємий для I2P з\'єднань</string>
+    <string name="configure_i2p_instructions">Зразок конфігурації I2P</string>
+    <string name="account_settings_hostname">Ім\'я сервера</string>
     <string name="account_settings_port">Порт</string>
     <string name="hostname_or_onion">Адреса сервера або адреса .onion</string>
     <string name="not_a_valid_port">Це недійсний номер порту</string>

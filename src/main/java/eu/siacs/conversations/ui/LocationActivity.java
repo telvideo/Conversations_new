@@ -98,10 +98,10 @@ public abstract class LocationActivity extends ActionBarActivity implements Loca
 		config.load(ctx, getPreferences());
 		config.setUserAgentValue(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_CODE);
 		final boolean useTor = QuickConversationsService.isConversations() && getBooleanPreference("use_tor", R.bool.use_tor);
-		final boolean useI2P = QuickConversationsService.isConversations() && getBooleanPreference("use_i2p", R.bool.use_i2p);
-		if (useTor || useI2P) {
-			config.setHttpProxy(HttpConnectionManager.getProxy(useI2P));
+		if (useTor) {
+			config.setHttpProxy(HttpConnectionManager.getTorProxy());
 		}
+		// there is no official way to proxy maps via i2p
 	}
 
 	@Override

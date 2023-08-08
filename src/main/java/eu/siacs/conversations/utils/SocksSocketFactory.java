@@ -11,10 +11,12 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 
 import eu.siacs.conversations.Config;
+import eu.siacs.conversations.http.ProxyConfig;
 
 public class SocksSocketFactory {
 
     private static final byte[] LOCALHOST = new byte[]{127, 0, 0, 1};
+    private static final int TOR_PORT = 9050;
 
     public static void createSocksConnection(final Socket socket, final String destination, final int port) throws IOException {
         //TODO use different Socks Addr Type if destination is IP or IPv6
@@ -100,11 +102,11 @@ public class SocksSocketFactory {
     }
 
     public static Socket createSocketOverTor(String destination, int port) throws IOException {
-        return createSocket(new InetSocketAddress(InetAddress.getByAddress(LOCALHOST), 9050), destination, port);
+        return createSocket(new InetSocketAddress(InetAddress.getByAddress(LOCALHOST), TOR_PORT), destination, port);
     }
 
-    public static Socket createSocketOverI2P(String destination, int port) throws IOException {
-        return createSocket(new InetSocketAddress(InetAddress.getByAddress(LOCALHOST), 4447), destination, port);
+    public static Socket createSocketOverI2P(ProxyConfig config, String destination, int port) throws IOException {
+        return createSocket(new InetSocketAddress(InetAddress.getByName(config.host), config.port), destination, port);
     }
 
     private static class SocksConnectionException extends IOException {

@@ -499,8 +499,14 @@
     <string name="pref_connection_options">Connection</string>
     <string name="pref_use_tor">Connect via Tor</string>
     <string name="pref_use_tor_summary">Tunnel all connections through the Tor network. Requires Orbot</string>
-    <string name="pref_use_i2p">Connect via I2P</string>
-    <string name="pref_use_i2p_summary">Tunnel all connections through the I2P network. Requires I2P client</string>
+    <string name="pref_use_i2p_proxy_type">I2P proxy type</string>
+    <string name="pref_use_i2p_proxy_type_summary">Proxy protocol used for I2P connections</string>
+    <string name="pref_use_i2p_proxy_host">I2P proxy host</string>
+    <string name="pref_use_i2p_proxy_host_summary">Proxy host used for I2P connections</string>
+    <string name="pref_use_i2p_proxy_port">I2P proxy port</string>
+    <string name="pref_use_i2p_proxy_port_summary">Proxy port used for I2P connections</string>
+    <string name="configure_i2p_instructions">I2P configuration example</string>
+    <string name="configure_i2p_instructions_link">https://bit.ly/3KL5NGX</string>
     <string name="account_settings_hostname">Hostname</string>
     <string name="account_settings_port">Port</string>
     <string name="hostname_or_onion">Server- or .onion-address</string>
@@ -597,6 +603,9 @@
     <string name="remote_server_not_found">Remote server not found</string>
     <string name="remote_server_timeout">Remote server timeout</string>
     <string name="unable_to_update_account">Could not update account</string>
+    <string name="proxy_type_socks">SOCKS</string>
+    <string name="proxy_type_http">HTTP</string>
+    <string name="check_i2p_tunnel">use I2P proxy: %s://%s:%d</string>
     <string name="report_jid_as_spammer">Report this XMPP address for spamming.</string>
     <string name="pref_delete_omemo_identities">Delete OMEMO identities</string>
     <string name="pref_delete_omemo_identities_summary">Regenerate your OMEMO keys. All your contacts will have to verify you again. Only use this as a last resort.</string>
@@ -837,7 +846,10 @@
     <string name="no_name_set_instructions">Use the edit button to set your name.</string>
     <string name="reject_request">Reject request</string>
     <string name="install_orbot">Install Orbot</string>
+    <string name="install_i2p_">Install I2P(D)</string>
     <string name="start_orbot">Start Orbot</string>
+    <string name="start_i2pd">Start I2PD</string>
+    <string name="start_i2p">Start I2P</string>
     <string name="no_market_app_installed">No market app installed.</string>
     <string name="group_chat_will_make_your_jabber_id_public">This channel will make your XMPP address public</string>
     <string name="ebook">e-book</string>
@@ -1001,6 +1013,7 @@
     <string name="account_status_temporary_auth_failure">Temporary authentication failure</string>
     <string name="delete_avatar">Delete avatar</string>
     <string name="audio_video_disabled_tor">Calls are disabled when using Tor</string>
+    <string name="audio_video_disabled_i2p">Calls are disabled when using I2P</string>
     <string name="switch_to_video">Switch to video</string>
     <string name="reject_switch_to_video">Reject switch to video request</string>
     <string name="unified_push_distributor">UnifiedPush Distributor</string>

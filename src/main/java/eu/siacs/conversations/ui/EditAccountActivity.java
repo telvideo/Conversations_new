@@ -39,6 +39,7 @@ import androidx.databinding.DataBindingUtil;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.common.base.CharMatcher;
 
+import eu.siacs.conversations.http.ProxyConfig;
 import org.openintents.openpgp.util.OpenPgpUtils;
 
 import java.util.Arrays;
@@ -70,6 +71,7 @@ import eu.siacs.conversations.utils.CryptoHelper;
 import eu.siacs.conversations.utils.Resolver;
 import eu.siacs.conversations.utils.SignupUtils;
 import eu.siacs.conversations.utils.TorServiceUtils;
+import eu.siacs.conversations.utils.I2pdServiceUtils;
 import eu.siacs.conversations.utils.UIHelper;
 import eu.siacs.conversations.utils.XmppUri;
 import eu.siacs.conversations.xml.Element;
@@ -91,6 +93,9 @@ public class EditAccountActivity extends OmemoActivity implements OnAccountUpdat
     private static final int REQUEST_DATA_SAVER = 0xf244;
     private static final int REQUEST_CHANGE_STATUS = 0xee11;
     private static final int REQUEST_ORBOT = 0xff22;
+    private static final int REQUEST_I2PD = 0xff23;
+    private static final int REQUEST_I2P = 0xff24;
+    private static final int REQUEST_DOWNLOAD_I2PD = 0xff25;
     private final PendingItem<PresenceTemplate> mPendingPresenceTemplate = new PendingItem<>();
     private AlertDialog mCaptchaDialog = null;
     private Jid jidToEdit;
@@ -137,7 +142,6 @@ public class EditAccountActivity extends OmemoActivity implements OnAccountUpdat
     private boolean mSavedInstanceInit = false;
     private XmppUri pendingUri = null;
     private boolean mUseTor;
-    private boolean mUseI2P;
     private ActivityEditAccountBinding binding;
     private final OnClickListener mSaveButtonClickListener = new OnClickListener() {
 
@@ -183,7 +187,28 @@ public class EditAccountActivity extends OmemoActivity implements OnAccountUpdat
             }
 
             if (startI2P) {
-                return; // just exit
+                boolean installedI2pd = I2pdServiceUtils.isI2pdInstalled(EditAccountActivity.this);
+                boolean installedI2pJava = I2pdServiceUtils.isI2pInstalled(EditAccountActivity.this);
+                if (installedI2pd || installedI2pJava) {
+                    if (installedI2pd) {
+                        I2pdServiceUtils.startI2pd(EditAccountActivity.this, REQUEST_I2PD);
+                    } else {
+                        I2pdServiceUtils.startI2p(EditAccountActivity.this, REQUEST_I2P);
+                    }
+                    // if connection error show used configuration
+                    final ProxyConfig i2pProxyConfig = xmppConnectionService.getI2pProxyConfig();
+                    Toast.makeText(
+                            EditAccountActivity.this,
+                            getString(
+                                    R.string.check_i2p_tunnel,
+                                    i2pProxyConfig.isSocks ? "socks" : "http",
+                                    i2pProxyConfig.host,
+                                    i2pProxyConfig.port),
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    I2pdServiceUtils.downloadI2pd(EditAccountActivity.this, REQUEST_DOWNLOAD_I2PD);
+                }
+                return;
             }
 
             if (inNeedOfSaslAccept()) {
@@ -745,8 +770,7 @@ public class EditAccountActivity extends OmemoActivity implements OnAccountUpdat
         }
         SharedPreferences preferences = getPreferences();
         mUseTor = QuickConversationsService.isConversations() && preferences.getBoolean("use_tor", getResources().getBoolean(R.bool.use_tor));
-        mUseI2P = QuickConversationsService.isConversations() && preferences.getBoolean("use_i2p", getResources().getBoolean(R.bool.use_i2p));
-        this.mShowOptions = mUseTor || mUseI2P || (QuickConversationsService.isConversations() && preferences.getBoolean("show_connection_options", getResources().getBoolean(R.bool.show_connection_options)));
+        this.mShowOptions = mUseTor || QuickConversationsService.isConversations() && preferences.getBoolean("show_connection_options", getResources().getBoolean(R.bool.show_connection_options));
         this.binding.namePort.setVisibility(mShowOptions ? View.VISIBLE : View.GONE);
         if (mForceRegister != null) {
             this.binding.accountRegisterNew.setVisibility(View.GONE);

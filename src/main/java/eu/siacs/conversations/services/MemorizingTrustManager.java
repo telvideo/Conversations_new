@@ -39,6 +39,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.util.SparseArray;
 
+import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.common.base.Charsets;
@@ -46,6 +47,7 @@ import com.google.common.base.Joiner;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 
+import eu.siacs.conversations.http.ProxyConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -425,14 +427,33 @@ public class MemorizingTrustManager {
         return getPoshFingerprintsFromServer(domain, "https://" + domain + "/.well-known/posh/xmpp-client.json", -1, true);
     }
 
+    public String getStringPreference(String name, @StringRes int defaultRes) {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(master);
+        return preferences.getString(name, master.getResources().getString(defaultRes));
+    }
+
+    private String i2pProxyType() {
+        return getStringPreference("use_i2p_proxy_type", R.string.default_use_i2p_proxy_type_socks);
+    }
+
+    private String i2pProxyHost() {
+        return getStringPreference("use_i2p_proxy_host", R.string.default_use_i2p_proxy_host);
+    }
+
+    public ProxyConfig getI2pProxyConfig() {
+        return new ProxyConfig(
+                master.getResources().getString(R.string.default_use_i2p_proxy_type_socks) == i2pProxyType(),
+                i2pProxyHost(),
+                Integer.parseInt(getStringPreference("use_i2p_proxy_port", R.string.default_use_i2p_proxy_port)));
+    }
+
     private List<String> getPoshFingerprintsFromServer(String domain, String url, int maxTtl, boolean followUrl) {
         Log.d(Config.LOGTAG, "downloading json for " + domain + " from " + url);
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(master);
         final boolean useTor = QuickConversationsService.isConversations() && preferences.getBoolean("use_tor", master.getResources().getBoolean(R.bool.use_tor));
-        final boolean useI2P = QuickConversationsService.isConversations() && preferences.getBoolean("use_i2p", master.getResources().getBoolean(R.bool.use_i2p));
         try {
             final List<String> results = new ArrayList<>();
-            final InputStream inputStream = HttpConnectionManager.open(url, useTor, useI2P);
+            final InputStream inputStream = HttpConnectionManager.open(url, useTor, domain.endsWith(".i2p"), getI2pProxyConfig());
             final String body = CharStreams.toString(new InputStreamReader(ByteStreams.limit(inputStream, 10_000), Charsets.UTF_8));
             final JSONObject jsonObject = new JSONObject(body);
             int expires = jsonObject.getInt("expires");

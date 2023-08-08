@@ -1569,7 +1569,7 @@ public class ConversationFragment extends XmppFragment
             Toast.makeText(activity, R.string.disable_tor_to_make_call, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (activity.mUseI2P || conversation.getAccount().isI2P()) {
+        if (conversation.getAccount().isI2P()) {
             Toast.makeText(activity, R.string.no_i2p_calls, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1592,7 +1592,7 @@ public class ConversationFragment extends XmppFragment
             Toast.makeText(activity, R.string.disable_tor_to_make_call, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (activity.mUseI2P || conversation.getAccount().isI2P()) {
+        if (conversation.getAccount().isI2P()) {
             Toast.makeText(activity, R.string.no_i2p_calls, Toast.LENGTH_SHORT).show();
             return;
         }

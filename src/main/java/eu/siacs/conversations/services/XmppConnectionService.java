@@ -49,6 +49,7 @@ import android.util.Pair;
 import androidx.annotation.BoolRes;
 import androidx.annotation.IntegerRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.core.app.RemoteInput;
 import androidx.core.content.ContextCompat;
 
@@ -56,6 +57,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 
+import eu.siacs.conversations.http.ProxyConfig;
 import org.conscrypt.Conscrypt;
 import org.openintents.openpgp.IOpenPgpService2;
 import org.openintents.openpgp.util.OpenPgpApi;
@@ -4134,6 +4136,18 @@ public class XmppConnectionService extends Service {
         return !body.content.equals(message.getBody());
     }
 
+    private String i2pProxyType() {
+        return getStringPreference("use_i2p_proxy_type", R.string.default_use_i2p_proxy_type_socks);
+    }
+
+    private String i2pProxyHost() {
+        return getStringPreference("use_i2p_proxy_host", R.string.default_use_i2p_proxy_host);
+    }
+
+    private int i2pProxyPort() {
+        return Integer.parseInt(getStringPreference("use_i2p_proxy_port", R.string.default_use_i2p_proxy_port));
+    }
+
     public void markMessage(Message message, int status) {
         markMessage(message, status, null);
     }
@@ -4182,6 +4196,10 @@ public class XmppConnectionService extends Service {
         return getPreferences().getBoolean(name, getResources().getBoolean(res));
     }
 
+    public String getStringPreference(String name, @StringRes int defaultRes) {
+        return getPreferences().getString(name, getResources().getString(defaultRes));
+    }
+
     public boolean confirmMessages() {
         return getBooleanPreference("confirm_messages", R.bool.confirm_messages);
     }
@@ -4202,8 +4220,12 @@ public class XmppConnectionService extends Service {
         return QuickConversationsService.isConversations() && getBooleanPreference("use_tor", R.bool.use_tor);
     }
 
-    public boolean useI2PToConnect() {
-        return QuickConversationsService.isConversations() && getBooleanPreference("use_i2p", R.bool.use_i2p);
+    public ProxyConfig getI2pProxyConfig() {
+        return new ProxyConfig(
+                getResources().getString(R.string.default_use_i2p_proxy_type_socks).equals(i2pProxyType()),
+            i2pProxyHost(),
+            i2pProxyPort()
+        );
     }
 
     public boolean showExtendedConnectionOptions() {

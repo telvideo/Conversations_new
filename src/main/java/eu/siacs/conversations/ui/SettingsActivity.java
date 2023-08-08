@@ -495,6 +495,10 @@ public class SettingsActivity extends XmppActivity implements OnSharedPreference
             }
             reconnectAccounts();
             xmppConnectionService.reinitializeMuclumbusService();
+        } else if (name.startsWith("use_i2p_proxy_")) {
+            displayToast(getString(R.string.audio_video_disabled_i2p));
+            reconnectAccounts();
+            xmppConnectionService.reinitializeMuclumbusService();
         } else if (name.equals(AUTOMATIC_MESSAGE_DELETION)) {
             xmppConnectionService.expireOldMessages(true);
         } else if (name.equals(THEME)) {

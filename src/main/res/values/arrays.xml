@@ -126,4 +126,13 @@
 		<item>JABBER_NETWORK</item>
 		<item>LOCAL_SERVER</item>
 	</string-array>
+
+	<string-array name="proxy_type_setting_entries">
+		<item>@string/proxy_type_socks</item>
+<!--		<item>@string/proxy_type_http</item> disabled because hard to create XMPP connection over HTTP-->
+	</string-array>
+	<string-array name="proxy_type_setting_values">
+		<item>@string/default_use_i2p_proxy_type_socks</item>
+<!--		<item>HTTP</item>-->
+	</string-array>
 </resources>

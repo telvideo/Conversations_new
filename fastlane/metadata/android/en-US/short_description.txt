@@ -1,1 +1,1 @@
-A Conversations fork with I2P support
+Encrypted, easy-to-use XMPP instant messenger for your mobile device

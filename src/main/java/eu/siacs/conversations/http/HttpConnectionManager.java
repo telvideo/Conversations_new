@@ -9,10 +9,7 @@ import org.apache.http.conn.ssl.StrictHostnameVerifier;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -66,7 +63,7 @@ public class HttpConnectionManager extends AbstractConnectionManager {
         super(service);
     }
 
-    public static Proxy getProxy(boolean isI2P) {
+    public static Proxy getTorProxy() {
         final InetAddress localhost;
         try {
             localhost = InetAddress.getByAddress(new byte[]{127, 0, 0, 1});
@@ -74,10 +71,21 @@ public class HttpConnectionManager extends AbstractConnectionManager {
             throw new IllegalStateException(e);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(localhost, isI2P ? 4447 : 9050));
+            return new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(localhost, 9050));
         } else {
-            return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(localhost, isI2P ? 4444 : 8118));
+            return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(localhost, 8118));
         }
+    }
+
+    public static Proxy getI2pProxy(ProxyConfig config) {
+        final InetAddress proxyHost;
+        try {
+            proxyHost = InetAddress.getByName(config.host);
+        } catch (final UnknownHostException e) {
+            throw new IllegalStateException(e);
+        }
+        final Proxy.Type proxyType = config.isSocks ? Proxy.Type.SOCKS : Proxy.Type.HTTP;
+        return new Proxy(proxyType, new InetSocketAddress(proxyHost, config.port));
     }
 
     public void createNewDownloadConnection(Message message) {
@@ -136,8 +144,11 @@ public class HttpConnectionManager extends AbstractConnectionManager {
         builder.writeTimeout(30, TimeUnit.SECONDS);
         builder.readTimeout(readTimeout, TimeUnit.SECONDS);
         setupTrustManager(builder, interactive);
-        if (mXmppConnectionService.useTorToConnect() || account.isOnion() || onionSlot || mXmppConnectionService.useI2PToConnect() || account.isI2P() || I2PSlot) {
-            builder.proxy(HttpConnectionManager.getProxy(I2PSlot)).build();
+        if (account.isI2P() || I2PSlot) {
+            // good feature: better to use account proxy
+            builder.proxy(HttpConnectionManager.getI2pProxy(mXmppConnectionService.getI2pProxyConfig())).build();
+        } else if (mXmppConnectionService.useTorToConnect() || account.isOnion() || onionSlot) {
+            builder.proxy(HttpConnectionManager.getTorProxy()).build();
         }
         return builder.build();
     }
@@ -157,14 +168,16 @@ public class HttpConnectionManager extends AbstractConnectionManager {
         }
     }
 
-    public static InputStream open(final String url, final boolean tor, final boolean i2p) throws IOException {
-        return open(HttpUrl.get(url), tor, i2p);
+    public static InputStream open(final String url, final boolean tor, final boolean i2p, ProxyConfig i2pProxyConfig) throws IOException {
+        return open(HttpUrl.get(url), tor, i2p, i2pProxyConfig);
     }
 
-    public static InputStream open(final HttpUrl httpUrl, final boolean tor, final boolean i2p) throws IOException {
+    public static InputStream open(final HttpUrl httpUrl, final boolean tor, final boolean i2p, ProxyConfig i2pProxyConfig) throws IOException {
         final OkHttpClient.Builder builder = OK_HTTP_CLIENT.newBuilder();
-        if (tor || i2p) {
-            builder.proxy(HttpConnectionManager.getProxy(i2p)).build();
+        if (i2p) {
+            builder.proxy(HttpConnectionManager.getI2pProxy(i2pProxyConfig)).build();
+        } else if (tor) {
+            builder.proxy(HttpConnectionManager.getTorProxy()).build();
         }
         final OkHttpClient client = builder.build();
         final Request request = new Request.Builder().get().url(httpUrl).build();

@@ -71,11 +71,7 @@ import eu.siacs.conversations.ui.ConversationsActivity;
 import eu.siacs.conversations.ui.EditAccountActivity;
 import eu.siacs.conversations.ui.RtpSessionActivity;
 import eu.siacs.conversations.ui.TimePreference;
-import eu.siacs.conversations.utils.AccountUtils;
-import eu.siacs.conversations.utils.Compatibility;
-import eu.siacs.conversations.utils.GeoHelper;
-import eu.siacs.conversations.utils.TorServiceUtils;
-import eu.siacs.conversations.utils.UIHelper;
+import eu.siacs.conversations.utils.*;
 import eu.siacs.conversations.xmpp.XmppConnection;
 import eu.siacs.conversations.xmpp.jingle.AbstractJingleConnection;
 import eu.siacs.conversations.xmpp.jingle.Media;
@@ -1776,6 +1772,7 @@ public class NotificationService {
         final boolean showAllErrors = QuickConversationsService.isConversations();
         final List<Account> errors = new ArrayList<>();
         boolean torNotAvailable = false;
+        boolean i2pNotAvailable = false;
         for (final Account account : mXmppConnectionService.getAccounts()) {
             if (account.hasErrorStatus()
                     && account.showErrorNotification()
@@ -1783,6 +1780,7 @@ public class NotificationService {
                             || account.getLastErrorStatus() == Account.State.UNAUTHORIZED)) {
                 errors.add(account);
                 torNotAvailable |= account.getStatus() == Account.State.TOR_NOT_AVAILABLE;
+                i2pNotAvailable |= account.getStatus() == Account.State.I2P_NOT_AVAILABLE;
             }
         }
         if (mXmppConnectionService.foregroundNotificationNeedsUpdatingWhenErrorStateChanges()) {
@@ -1826,6 +1824,35 @@ public class NotificationService {
                                 mXmppConnectionService,
                                 146,
                                 TorServiceUtils.INSTALL_INTENT,
+                                s()
+                                        ? PendingIntent.FLAG_IMMUTABLE
+                                                | PendingIntent.FLAG_UPDATE_CURRENT
+                                        : PendingIntent.FLAG_UPDATE_CURRENT));
+            }
+        }
+        if (i2pNotAvailable) {
+            boolean installedI2pd = I2pdServiceUtils.isI2pdInstalled(mXmppConnectionService);
+            boolean installedI2pJava = I2pdServiceUtils.isI2pInstalled(mXmppConnectionService);
+            if (installedI2pd || installedI2pJava) {
+                mBuilder.addAction(
+                        R.drawable.ic_play_circle_filled_white_48dp,
+                        mXmppConnectionService.getString(installedI2pd ? R.string.start_i2pd : R.string.start_i2p),
+                        PendingIntent.getActivity(
+                                mXmppConnectionService,
+                                147,
+                                installedI2pd ? I2pdServiceUtils.getLaunchIntentI2pd() : I2pdServiceUtils.LAUNCH_I2P_INTENT,
+                                s()
+                                        ? PendingIntent.FLAG_IMMUTABLE
+                                                | PendingIntent.FLAG_UPDATE_CURRENT
+                                        : PendingIntent.FLAG_UPDATE_CURRENT));
+            } else {
+                mBuilder.addAction(
+                        R.drawable.ic_file_download_white_24dp,
+                        mXmppConnectionService.getString(R.string.install_i2p_),
+                        PendingIntent.getActivity(
+                                mXmppConnectionService,
+                                146,
+                                I2pdServiceUtils.INSTALL_INTENT,
                                 s()
                                         ? PendingIntent.FLAG_IMMUTABLE
                                                 | PendingIntent.FLAG_UPDATE_CURRENT

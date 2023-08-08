@@ -293,11 +293,31 @@
                     android:key="use_tor"
                     android:summary="@string/pref_use_tor_summary"
                     android:title="@string/pref_use_tor" />
-                <CheckBoxPreference
-                    android:defaultValue="@bool/use_i2p"
-                    android:key="use_i2p"
-                    android:summary="@string/pref_use_i2p_summary"
-                    android:title="@string/pref_use_i2p" />
+                <ListPreference
+                        android:defaultValue="@string/default_use_i2p_proxy_type_socks"
+                        android:entries="@array/proxy_type_setting_entries"
+                        android:entryValues="@array/proxy_type_setting_values"
+                        android:key="use_i2p_proxy_type"
+                        android:summary="@string/pref_use_i2p_proxy_type_summary"
+                        android:title="@string/pref_use_i2p_proxy_type" />
+                <EditTextPreference
+                        android:defaultValue="@string/default_use_i2p_proxy_host"
+                        android:key="use_i2p_proxy_host"
+                        android:summary="@string/pref_use_i2p_proxy_host_summary"
+                        android:title="@string/pref_use_i2p_proxy_host" />
+                <EditTextPreference
+                        android:defaultValue="@string/default_use_i2p_proxy_port"
+                        android:key="use_i2p_proxy_port"
+                        android:inputType="numberDecimal"
+                        android:digits="0123456789"
+                        android:summary="@string/pref_use_i2p_proxy_port_summary"
+                        android:title="@string/pref_use_i2p_proxy_port" />
+                <Preference
+                        android:title="@string/configure_i2p_instructions" >
+                    <intent
+                            android:action="android.intent.action.VIEW"
+                            android:data="@string/configure_i2p_instructions_link" />
+                </Preference>
                 <CheckBoxPreference
                     android:defaultValue="@bool/show_connection_options"
                     android:key="show_connection_options"

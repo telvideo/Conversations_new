@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 
+import eu.siacs.conversations.http.ProxyConfig;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
@@ -287,9 +288,57 @@ public class XmppConnection implements Runnable {
             shouldAuthenticate = !account.isOptionSet(Account.OPTION_REGISTER);
             this.changeStatus(Account.State.CONNECTING);
             final boolean useTor = mXmppConnectionService.useTorToConnect() || account.isOnion();
-            final boolean useI2P = mXmppConnectionService.useI2PToConnect() || account.isI2P();
+            final boolean isI2pHost = account.getHostname() == null || account.getHostname().isEmpty()
+                    ? account.isI2P()
+                    : account.getHostname().endsWith(".i2p");
             final boolean extended = mXmppConnectionService.showExtendedConnectionOptions();
-            if (useTor && !useI2P) {
+            if (isI2pHost) {
+                String destination;
+                if (account.getHostname().isEmpty()) {
+                    destination = account.getServer();
+                } else {
+                    destination = account.getHostname();
+                }
+                if (destination.endsWith(".b32.i2p")) {
+                    Log.d(
+                            Config.LOGTAG,
+                            account.getJid().asBareJid()
+                                    + ": mark b32 i2p domain as verified "
+                                    + destination);
+                    this.verifiedHostname = destination;
+                }
+
+                final int port = account.getPort();
+                final boolean directTls = Resolver.useDirectTls(port);
+
+                Log.d(
+                        Config.LOGTAG,
+                        account.getJid().asBareJid()
+                                + ": connect to "
+                                + destination
+                                + " via I2P. directTls="
+                                + directTls);
+                localSocket = SocksSocketFactory.createSocketOverI2P(
+                        mXmppConnectionService.getI2pProxyConfig(),
+                        destination,
+                        port);
+
+                if (directTls) {
+                    localSocket = upgradeSocketToTls(localSocket);
+                    features.encryptionEnabled = true;
+                }
+
+                try {
+                    startXmpp(localSocket);
+                } catch (InterruptedException e) {
+                    Log.d(
+                            Config.LOGTAG,
+                            account.getJid().asBareJid() + ": thread was interrupted before beginning stream");
+                    return;
+                } catch (Exception e) {
+                    throw new IOException(e.getMessage());
+                }
+            } else if (useTor && !account.isI2P()) { // tor doesn't serve i2p then treat i2p host as local network host
                 String destination;
                 if (account.getHostname().isEmpty() || account.isOnion()) {
                     destination = account.getServer();
@@ -325,34 +374,6 @@ public class XmppConnection implements Runnable {
                     return;
                 } catch (final Exception e) {
                     throw new IOException("Could not start stream", e);
-                }
-            } else if (useI2P) {
-                String destination;
-                if (account.getHostname().isEmpty() || account.isI2P()) {
-                    destination = account.getServer();
-                } else {
-                    destination = account.getHostname();
-                    this.verifiedHostname = destination;
-                }
-
-                final int port = account.getPort();
-                final boolean directTls = Resolver.useDirectTls(port);
-
-                Log.d(Config.LOGTAG, account.getJid().asBareJid() + ": connect to " + destination + " via I2P. directTls=" + directTls);
-                localSocket = SocksSocketFactory.createSocketOverI2P(destination, port);
-
-                if (directTls) {
-                    localSocket = upgradeSocketToTls(localSocket);
-                    features.encryptionEnabled = true;
-                }
-
-                try {
-                    startXmpp(localSocket);
-                } catch (InterruptedException e) {
-                    Log.d(Config.LOGTAG, account.getJid().asBareJid() + ": thread was interrupted before beginning stream");
-                    return;
-                } catch (Exception e) {
-                    throw new IOException(e.getMessage());
                 }
             } else {
                 final String domain = account.getServer();
@@ -1676,15 +1697,16 @@ public class XmppConnection implements Runnable {
                         } else {
                             final boolean useTor =
                                     mXmppConnectionService.useTorToConnect() || account.isOnion();
-                            final boolean useI2P =
-                                    mXmppConnectionService.useI2PToConnect() || account.isI2P();
+                            final boolean useI2p = account.isI2P()
+                                    || (account.getHostname() != null && account.getHostname().endsWith(".i2p"));
+                            final ProxyConfig i2pProxyConfig = mXmppConnectionService.getI2pProxyConfig();
                             try {
                                 final String url = data.getValue("url");
                                 final String fallbackUrl = data.getValue("captcha-fallback-url");
                                 if (url != null) {
-                                    is = HttpConnectionManager.open(url, useTor, useI2P);
+                                    is = HttpConnectionManager.open(url, useTor, useI2p, i2pProxyConfig);
                                 } else if (fallbackUrl != null) {
-                                    is = HttpConnectionManager.open(fallbackUrl, useTor, useI2P);
+                                    is = HttpConnectionManager.open(fallbackUrl, useTor, useI2p, i2pProxyConfig);
                                 } else {
                                     is = null;
                                 }
