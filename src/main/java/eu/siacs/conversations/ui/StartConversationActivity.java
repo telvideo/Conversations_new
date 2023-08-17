@@ -323,7 +323,11 @@ public class StartConversationActivity extends XmppActivity implements XmppConne
             }
             switch (actionItem.getId()) {
                 case R.id.discover_public_channels:
-                    startActivity(new Intent(this, ChannelDiscoveryActivity.class));
+                    if (QuickConversationsService.isPlayStoreFlavor()) {
+                        throw new IllegalStateException("Channel discovery is not available on Google Play flavor");
+                    } else {
+                        startActivity(new Intent(this, ChannelDiscoveryActivity.class));
+                    }
                     break;
                 case R.id.join_public_channel:
                     showJoinConferenceDialog(prefilled);
@@ -349,6 +353,9 @@ public class StartConversationActivity extends XmppActivity implements XmppConne
         final Menu menu = popupMenu.getMenu();
         for (int i = 0; i < menu.size(); i++) {
             final MenuItem menuItem = menu.getItem(i);
+            if (QuickConversationsService.isPlayStoreFlavor() && menuItem.getItemId() == R.id.discover_public_channels) {
+                continue;
+            }
             final SpeedDialActionItem actionItem = new SpeedDialActionItem.Builder(menuItem.getItemId(), menuItem.getIcon())
                     .setLabel(menuItem.getTitle() != null ? menuItem.getTitle().toString() : null)
                     .setFabImageTintColor(ContextCompat.getColor(this, R.color.white))
@@ -645,8 +652,8 @@ public class StartConversationActivity extends XmppActivity implements XmppConne
             mSearchEditText.setHint(R.string.search_contacts);
             mSearchEditText.setContentDescription(getString(R.string.search_contacts));
         } else {
-            mSearchEditText.setHint(R.string.search_bookmarks);
-            mSearchEditText.setContentDescription(getString(R.string.search_bookmarks));
+            mSearchEditText.setHint(R.string.search_group_chats);
+            mSearchEditText.setContentDescription(getString(R.string.search_group_chats));
         }
     }
 
@@ -757,7 +764,7 @@ public class StartConversationActivity extends XmppActivity implements XmppConne
                         final AtomicBoolean requestPermission = new AtomicBoolean(false);
                         builder.setTitle(R.string.sync_with_contacts);
                         if (QuickConversationsService.isQuicksy()) {
-                            builder.setMessage(Html.fromHtml(getString(R.string.sync_with_contacts_quicksy)));
+                            builder.setMessage(Html.fromHtml(getString(R.string.sync_with_contacts_quicksy_static)));
                         } else {
                             builder.setMessage(getString(R.string.sync_with_contacts_long, getString(R.string.app_name)));
                         }
@@ -765,7 +772,7 @@ public class StartConversationActivity extends XmppActivity implements XmppConne
                         if (QuickConversationsService.isConversations()) {
                             confirmButtonText = R.string.next;
                         } else {
-                            confirmButtonText = R.string.confirm;
+                            confirmButtonText = R.string.agree_and_continue;
                         }
                         builder.setPositiveButton(confirmButtonText, (dialog, which) -> {
                             if (requestPermission.compareAndSet(false, true)) {
@@ -775,9 +782,11 @@ public class StartConversationActivity extends XmppActivity implements XmppConne
                         builder.setOnDismissListener(dialog -> {
                             if (QuickConversationsService.isConversations() && requestPermission.compareAndSet(false, true)) {
                                 requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_SYNC_CONTACTS);
-
                             }
                         });
+                        if (QuickConversationsService.isQuicksy()) {
+                            builder.setNegativeButton(R.string.decline, null);
+                        }
                         builder.setCancelable(QuickConversationsService.isQuicksy());
                         final AlertDialog dialog = builder.create();
                         dialog.setCanceledOnTouchOutside(QuickConversationsService.isQuicksy());
@@ -798,6 +807,7 @@ public class StartConversationActivity extends XmppActivity implements XmppConne
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults.length > 0)
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 ScanActivity.onRequestPermissionResult(this, requestCode, grantResults);
@@ -1297,7 +1307,7 @@ public class StartConversationActivity extends XmppActivity implements XmppConne
                 case 0:
                     return getResources().getString(R.string.contacts);
                 case 1:
-                    return getResources().getString(R.string.bookmarks);
+                    return getResources().getString(R.string.group_chats);
                 default:
                     return super.getPageTitle(position);
             }

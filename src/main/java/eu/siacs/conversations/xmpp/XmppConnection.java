@@ -162,6 +162,7 @@ public class XmppConnection implements Runnable {
     private boolean quickStartInProgress = false;
     private boolean isBound = false;
     private Element streamFeatures;
+    private Element boundStreamFeatures;
     private String streamId = null;
     private int stanzasReceived = 0;
     private int stanzasSent = 0;
@@ -828,8 +829,11 @@ public class XmppConnection implements Runnable {
                                 + ": server sent bound and resumed in SASL2 success");
                 throw new StateChangingException(Account.State.INCOMPATIBLE_SERVER);
             }
-            final boolean processNopStreamFeatures;
             if (resumed != null && streamId != null) {
+                if (this.boundStreamFeatures != null) {
+                    this.streamFeatures = this.boundStreamFeatures;
+                    Log.d(Config.LOGTAG, "putting previous stream features back in place: " + XmlHelper.printElementNames(this.boundStreamFeatures));
+                }
                 processResumed(resumed);
             } else if (failed != null) {
                 processFailed(failed, false); // wait for new stream features
@@ -837,6 +841,8 @@ public class XmppConnection implements Runnable {
             if (bound != null) {
                 clearIqCallbacks();
                 this.isBound = true;
+                processNopStreamFeatures();
+                this.boundStreamFeatures = this.streamFeatures;
                 final Element streamManagementEnabled =
                         bound.findChild("enabled", Namespace.STREAM_MANAGEMENT);
                 final Element carbonsEnabled = bound.findChild("enabled", Namespace.CARBONS);
@@ -856,9 +862,6 @@ public class XmppConnection implements Runnable {
                     features.carbonsEnabled = true;
                 }
                 sendPostBindInitialization(waitForDisco, carbonsEnabled != null);
-                processNopStreamFeatures = true;
-            } else {
-                processNopStreamFeatures = false;
             }
             final HashedToken.Mechanism tokenMechanism;
             if (SaslMechanism.hashedToken(currentSaslMechanism)) {
@@ -879,10 +882,6 @@ public class XmppConnection implements Runnable {
                         account.getJid().asBareJid()
                                 + ": no response to our hashed token request "
                                 + this.hashTokenRequest);
-            }
-            // a successful resume will not send stream features
-            if (processNopStreamFeatures) {
-                processNopStreamFeatures();
             }
         }
         mXmppConnectionService.databaseBackend.updateAccount(account);
@@ -1442,6 +1441,7 @@ public class XmppConnection implements Runnable {
                 throw new StateChangingException(Account.State.INCOMPATIBLE_SERVER);
             }
         } else {
+
             Log.d(
                     Config.LOGTAG,
                     account.getJid().asBareJid()
@@ -1598,7 +1598,9 @@ public class XmppConnection implements Runnable {
                     .addChild("device")
                     .setContent(String.format("%s %s", Build.MANUFACTURER, Build.MODEL));
         }
-        if (bind != null) {
+        // do not include bind if 'inlinestreamManagment' is missing and we have a streamId
+        final boolean mayAttemptBind = streamId == null || inlineStreamManagement;
+        if (bind != null && mayAttemptBind) {
             authenticate.addChild(generateBindRequest(bind));
         }
         if (inlineStreamManagement && streamId != null) {
@@ -2479,6 +2481,7 @@ public class XmppConnection implements Runnable {
 
     private void resetStreamId() {
         this.streamId = null;
+        this.boundStreamFeatures = null;
     }
 
     private List<Entry<Jid, ServiceDiscoveryResult>> findDiscoItemsByFeature(final String feature) {

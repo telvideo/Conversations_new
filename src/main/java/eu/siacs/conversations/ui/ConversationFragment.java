@@ -1973,8 +1973,7 @@ public class ConversationFragment extends XmppFragment
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             final List<String> missingPermissions = new ArrayList<>();
             for (String permission : permissions) {
-                if (Config.ONLY_INTERNAL_STORAGE
-                        && permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU || Config.ONLY_INTERNAL_STORAGE) && permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     continue;
                 }
                 if (activity.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
@@ -2460,12 +2459,14 @@ public class ConversationFragment extends XmppFragment
         this.binding.textSendButton.setContentDescription(
                 activity.getString(R.string.send_message_to_x, conversation.getName()));
         this.binding.textinput.setKeyboardListener(null);
-        this.binding.textinput.setText("");
         final boolean participating =
                 conversation.getMode() == Conversational.MODE_SINGLE
                         || conversation.getMucOptions().participating();
         if (participating) {
-            this.binding.textinput.append(this.conversation.getNextMessage());
+            this.binding.textinput.setText(this.conversation.getNextMessage());
+            this.binding.textinput.setSelection(this.binding.textinput.length());
+        } else {
+            this.binding.textinput.setText(MessageUtils.EMPTY_STRING);
         }
         this.binding.textinput.setKeyboardListener(this);
         messageListAdapter.updatePreferences();

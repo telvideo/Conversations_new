@@ -32,6 +32,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
@@ -52,6 +53,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.core.app.RemoteInput;
 import androidx.core.content.ContextCompat;
+import androidx.core.util.Consumer;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
@@ -59,6 +61,7 @@ import com.google.common.base.Strings;
 
 import eu.siacs.conversations.http.ProxyConfig;
 import org.conscrypt.Conscrypt;
+import org.jxmpp.stringprep.libidn.LibIdnXmppStringprep;
 import org.openintents.openpgp.IOpenPgpService2;
 import org.openintents.openpgp.util.OpenPgpApi;
 import org.openintents.openpgp.util.OpenPgpServiceConnection;
@@ -67,7 +70,6 @@ import java.io.File;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -129,7 +131,6 @@ import eu.siacs.conversations.ui.UiCallback;
 import eu.siacs.conversations.ui.interfaces.OnAvatarPublication;
 import eu.siacs.conversations.ui.interfaces.OnMediaLoaded;
 import eu.siacs.conversations.ui.interfaces.OnSearchResultsAvailable;
-import eu.siacs.conversations.utils.AccountUtils;
 import eu.siacs.conversations.utils.Compatibility;
 import eu.siacs.conversations.utils.ConversationsFileObserver;
 import eu.siacs.conversations.utils.CryptoHelper;
@@ -815,9 +816,18 @@ public class XmppConnectionService extends Service {
                     break;
                 case ACTION_RENEW_UNIFIED_PUSH_ENDPOINTS:
                     final String instance = intent.getStringExtra("instance");
-                    final Optional<UnifiedPushBroker.Transport> transport = renewUnifiedPushEndpoints();
+                    final String application = intent.getStringExtra("application");
+                    final Messenger messenger = intent.getParcelableExtra("messenger");
+                    final UnifiedPushBroker.PushTargetMessenger pushTargetMessenger;
+                    if (messenger != null && application != null && instance != null) {
+                        pushTargetMessenger = new UnifiedPushBroker.PushTargetMessenger(new UnifiedPushDatabase.PushTarget(application, instance),messenger);
+                        Log.d(Config.LOGTAG,"found push target messenger");
+                    } else {
+                        pushTargetMessenger = null;
+                    }
+                    final Optional<UnifiedPushBroker.Transport> transport = renewUnifiedPushEndpoints(pushTargetMessenger);
                     if (instance != null && transport.isPresent()) {
-                        unifiedPushBroker.rebroadcastEndpoint(instance, transport.get());
+                        unifiedPushBroker.rebroadcastEndpoint(messenger, instance, transport.get());
                     }
                     break;
                 case ACTION_IDLE_PING:
@@ -1146,6 +1156,7 @@ public class XmppConnectionService extends Service {
     @SuppressLint("TrulyRandom")
     @Override
     public void onCreate() {
+        LibIdnXmppStringprep.setup();
         if (Compatibility.runsTwentySix()) {
             mNotificationService.initializeChannels();
         }
@@ -2363,8 +2374,12 @@ public class XmppConnectionService extends Service {
         return this.unifiedPushBroker.reconfigurePushDistributor();
     }
 
+    private Optional<UnifiedPushBroker.Transport> renewUnifiedPushEndpoints(final UnifiedPushBroker.PushTargetMessenger pushTargetMessenger) {
+        return this.unifiedPushBroker.renewUnifiedPushEndpoints(pushTargetMessenger);
+    }
+
     public Optional<UnifiedPushBroker.Transport> renewUnifiedPushEndpoints() {
-        return this.unifiedPushBroker.renewUnifiedPushEndpoints();
+        return this.unifiedPushBroker.renewUnifiedPushEndpoints(null);
     }
 
     private void provisionAccount(final String address, final String password) {
@@ -2471,6 +2486,20 @@ public class XmppConnectionService extends Service {
                 callback.onPasswordChangeSucceeded();
             } else {
                 callback.onPasswordChangeFailed();
+            }
+        });
+    }
+
+    public void unregisterAccount(final Account account, final Consumer<Boolean> callback) {
+        final IqPacket iqPacket = new IqPacket(IqPacket.TYPE.SET);
+        final Element query = iqPacket.addChild("query",Namespace.REGISTER);
+        query.addChild("remove");
+        sendIqPacket(account, iqPacket, (a, response) -> {
+            if (response.getType() == IqPacket.TYPE.RESULT) {
+                deleteAccount(a);
+                callback.accept(true);
+            } else {
+                callback.accept(false);
             }
         });
     }
