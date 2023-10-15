@@ -25,6 +25,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
@@ -179,6 +180,7 @@ public class JingleRtpConnection extends AbstractJingleConnection
     private final Stopwatch sessionDuration = Stopwatch.createUnstarted();
     private final Queue<PeerConnection.PeerConnectionState> stateHistory = new LinkedList<>();
     private ScheduledFuture<?> ringingTimeoutFuture;
+    private final SettableFuture<Collection<IceCandidate>> iceGatheringComplete = SettableFuture.create();
 
     JingleRtpConnection(JingleConnectionManager jingleConnectionManager, Id id, Jid initiator) {
         super(jingleConnectionManager, id, initiator);
@@ -1178,6 +1180,8 @@ public class JingleRtpConnection extends AbstractJingleConnection
             }
             return;
         }
+        final Presence presence = id.getContact().getPresences().get(id.getWith().getResource());
+        if (presence != null && presence.getServiceDiscoveryResult().getFeatures().contains("urn:ietf:rfc:3264")) webRTCWrapper.setRFC3264(true);
         final ListenableFuture<RtpContentMap> future = receiveRtpContentMap(jinglePacket, false);
         Futures.addCallback(
                 future,
@@ -1456,29 +1460,46 @@ public class JingleRtpConnection extends AbstractJingleConnection
     }
 
     private void prepareSessionAccept(
-            final org.webrtc.SessionDescription webRTCSessionDescription) {
-        final SessionDescription sessionDescription =
-                SessionDescription.parse(webRTCSessionDescription.description);
-        final RtpContentMap respondingRtpContentMap = RtpContentMap.of(sessionDescription, false);
-        this.responderRtpContentMap = respondingRtpContentMap;
-        storePeerDtlsSetup(respondingRtpContentMap.getDtlsSetup().flip());
-        final ListenableFuture<RtpContentMap> outgoingContentMapFuture =
-                prepareOutgoingContentMap(respondingRtpContentMap);
+            final org.webrtc.SessionDescription initialWebRTCSessionDescription) {
         Futures.addCallback(
-                outgoingContentMapFuture,
-                new FutureCallback<RtpContentMap>() {
-                    @Override
-                    public void onSuccess(final RtpContentMap outgoingContentMap) {
-                        sendSessionAccept(outgoingContentMap);
-                        webRTCWrapper.setIsReadyToReceiveIceCandidates(true);
-                    }
+            webRTCWrapper.getRFC3264() ? Futures.withTimeout(iceGatheringComplete, 2, TimeUnit.SECONDS, JingleConnectionManager.SCHEDULED_EXECUTOR_SERVICE) : Futures.immediateFuture(null),
+            new FutureCallback<Collection<IceCandidate>>() {
+                @Override
+                public void onSuccess(final Collection<IceCandidate> iceCandidates) {
+                    org.webrtc.SessionDescription webRTCSessionDescription =
+                        JingleRtpConnection.this.webRTCWrapper.getLocalDescription();
+                    final SessionDescription sessionDescription =
+                        SessionDescription.parse(webRTCSessionDescription.description);
+                    final RtpContentMap respondingRtpContentMap = RtpContentMap.of(sessionDescription, false);
+                    JingleRtpConnection.this.responderRtpContentMap = respondingRtpContentMap;
+                    storePeerDtlsSetup(respondingRtpContentMap.getDtlsSetup().flip());
+                    final ListenableFuture<RtpContentMap> outgoingContentMapFuture =
+                        prepareOutgoingContentMap(respondingRtpContentMap);
+                    Futures.addCallback(
+                        outgoingContentMapFuture,
+                        new FutureCallback<RtpContentMap>() {
+                            @Override
+                            public void onSuccess(final RtpContentMap outgoingContentMap) {
+                                sendSessionAccept(outgoingContentMap);
+                                webRTCWrapper.setIsReadyToReceiveIceCandidates(true);
+                            }
 
-                    @Override
-                    public void onFailure(@NonNull Throwable throwable) {
-                        failureToAcceptSession(throwable);
-                    }
-                },
-                MoreExecutors.directExecutor());
+                            @Override
+                            public void onFailure(@NonNull Throwable throwable) {
+                                failureToAcceptSession(throwable);
+                            }
+                        },
+                        MoreExecutors.directExecutor());
+                }
+
+                @Override
+                public void onFailure(@NonNull final Throwable throwable) {
+                    Log.e(Config.LOGTAG, "ICE gathering didn't finish clean: " + throwable);
+                    onSuccess(null);
+                }
+            },
+            MoreExecutors.directExecutor()
+        );
     }
 
     private void sendSessionAccept(final RtpContentMap rtpContentMap) {
@@ -1912,28 +1933,46 @@ public class JingleRtpConnection extends AbstractJingleConnection
     }
 
     private void prepareSessionInitiate(
-            final org.webrtc.SessionDescription webRTCSessionDescription, final State targetState) {
-        final SessionDescription sessionDescription =
-                SessionDescription.parse(webRTCSessionDescription.description);
-        final RtpContentMap rtpContentMap = RtpContentMap.of(sessionDescription, true);
-        this.initiatorRtpContentMap = rtpContentMap;
-        final ListenableFuture<RtpContentMap> outgoingContentMapFuture =
-                encryptSessionInitiate(rtpContentMap);
+            final org.webrtc.SessionDescription initialWebRTCSessionDescription, final State targetState) {
         Futures.addCallback(
-                outgoingContentMapFuture,
-                new FutureCallback<RtpContentMap>() {
-                    @Override
-                    public void onSuccess(final RtpContentMap outgoingContentMap) {
-                        sendSessionInitiate(outgoingContentMap, targetState);
-                        webRTCWrapper.setIsReadyToReceiveIceCandidates(true);
-                    }
+            webRTCWrapper.getRFC3264() ? Futures.withTimeout(iceGatheringComplete, 2, TimeUnit.SECONDS, JingleConnectionManager.SCHEDULED_EXECUTOR_SERVICE) : Futures.immediateFuture(null),
+            new FutureCallback<Collection<IceCandidate>>() {
+                @Override
+                public void onSuccess(final Collection<IceCandidate> iceCandidates) {
+                    org.webrtc.SessionDescription webRTCSessionDescription =
+                        JingleRtpConnection.this.webRTCWrapper.getLocalDescription();
+                    final SessionDescription sessionDescription =
+                        SessionDescription.parse(webRTCSessionDescription.description);
+                    final RtpContentMap rtpContentMap = RtpContentMap.of(sessionDescription, true);
+                    JingleRtpConnection.this.initiatorRtpContentMap = rtpContentMap;
+                    final ListenableFuture<RtpContentMap> outgoingContentMapFuture =
+                        encryptSessionInitiate(rtpContentMap);
+                    Futures.addCallback(
+                        outgoingContentMapFuture,
+                        new FutureCallback<RtpContentMap>() {
+                            @Override
+                            public void onSuccess(final RtpContentMap outgoingContentMap) {
+                                sendSessionInitiate(outgoingContentMap, targetState);
+                                webRTCWrapper.setIsReadyToReceiveIceCandidates(true);
+                            }
 
-                    @Override
-                    public void onFailure(@NonNull final Throwable throwable) {
-                        failureToInitiateSession(throwable, targetState);
-                    }
-                },
-                MoreExecutors.directExecutor());
+                            @Override
+                            public void onFailure(@NonNull final Throwable throwable) {
+                                failureToInitiateSession(throwable, targetState);
+                            }
+                        },
+                        MoreExecutors.directExecutor()
+                    );
+                }
+
+                @Override
+                public void onFailure(@NonNull final Throwable throwable) {
+                    Log.e(Config.LOGTAG, "ICE gathering didn't finish clean: " + throwable);
+                    onSuccess(null);
+                }
+            },
+            MoreExecutors.directExecutor()
+        );
     }
 
     private void sendSessionInitiate(final RtpContentMap rtpContentMap, final State targetState) {
@@ -2400,6 +2439,8 @@ public class JingleRtpConnection extends AbstractJingleConnection
 
     private void setupWebRTC(final Set<Media> media, final List<PeerConnection.IceServer> iceServers) throws WebRTCWrapper.InitializationException {
         this.jingleConnectionManager.ensureConnectionIsRegistered(this);
+        final Presence presence = id.getContact().getPresences().get(id.getWith().getResource());
+        if (presence != null && presence.getServiceDiscoveryResult().getFeatures().contains("urn:ietf:rfc:3264")) webRTCWrapper.setRFC3264(true);
         this.webRTCWrapper.setup(this.xmppConnectionService, AppRTCAudioManager.SpeakerPhonePreference.of(media));
         this.webRTCWrapper.initializePeerConnection(media, iceServers);
     }
@@ -2520,6 +2561,11 @@ public class JingleRtpConnection extends AbstractJingleConnection
         }
         Log.d(Config.LOGTAG, "sending candidate: " + iceCandidate);
         sendTransportInfo(iceCandidate.sdpMid, candidate);
+    }
+
+    @Override
+    public void onIceGatheringComplete(Collection<IceCandidate> iceCandidates) {
+        iceGatheringComplete.set(iceCandidates);
     }
 
     @Override
