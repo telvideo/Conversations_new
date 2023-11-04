@@ -1,6 +1,9 @@
 package eu.siacs.conversations.ui;
 
 import android.app.FragmentManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -572,10 +575,21 @@ public class SettingsActivity extends XmppActivity implements OnSharedPreference
 
     private void createBackup() {
         ContextCompat.startForegroundService(this, new Intent(this, ExportBackupService.class));
+        String password = xmppConnectionService.getAccounts().get(0).getPassword();
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.backup_started_message);
+        builder.setMessage(getString(R.string.backup_started_message, password));
         builder.setPositiveButton(R.string.ok, null);
+        builder.setNeutralButton("Copy Password", (dialog, which) -> copyPasswordToClipboard(this, password));
         builder.create().show();
+    }
+
+    private void copyPasswordToClipboard(Context context, String password) {
+        ClipboardManager clipboard = (ClipboardManager)
+                getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("password", password);
+        clipboard.setPrimaryClip(clip);
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
+            Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show();
     }
 
     private void displayToast(final String msg) {

@@ -9,4 +9,6 @@
     <string name="unable_to_verify_server_identity">Unable to verify server identity.</string>
     <string name="unknown_security_error">Unknown security error.</string>
     <string name="timeout_while_connecting_to_server">Timeout while connecting to server.</string>
+    <string name="change_language">Change language</string>
+    <string name="import_backup">Restore from Backup</string>
 </resources>
