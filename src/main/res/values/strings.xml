@@ -996,7 +996,7 @@
     <string name="unable_to_parse_invite">Unable to parse invite</string>
     <string name="server_does_not_support_easy_onboarding_invites">Server does not support generating invites</string>
     <string name="no_active_accounts_support_this">No active accounts support this feature</string>
-    <string name="backup_started_message">The backup has been started. You’ll get a notification once it has been completed. Remember your password to be able to restore:\n\n%s</string>
+    <string name="backup_started_message">The backup has been started. You’ll get a notification once it has been completed. Remember your password to be able to restore:</string>
     <string name="unable_to_enable_video">Unable to enable video.</string>
     <string name="plain_text_document">Plain text document</string>
     <string name="account_registrations_are_not_supported">Account registrations are not supported</string>
@@ -1020,4 +1020,6 @@
     <string name="log_in">Log in</string>
     <string name="contact_uses_unverified_keys">Your contact uses unverified devices. Scan their 2D barcode to perform verification and impede active MITM attacks.</string>
     <string name="unverified_devices">You are using unverified devices. Scan the 2D barcode on your other devices to perform verification and impede active MITM attacks.</string>
+    <string name="show">Show</string>
+    <string name="hide">Hide</string>
 </resources>
