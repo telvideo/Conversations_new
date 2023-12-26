@@ -124,6 +124,8 @@ public class Message extends AbstractEntity implements AvatarService.Avatarable 
     private List<MucOptions.User> counterparts;
     private WeakReference<MucOptions.User> user;
 
+    private Integer mergedLen;
+
     protected Message(Conversational conversation) {
         this.conversation = conversation;
     }
@@ -322,6 +324,8 @@ public class Message extends AbstractEntity implements AvatarService.Avatarable 
     public void setCounterpart(final Jid counterpart) {
         this.counterpart = counterpart;
     }
+
+    public void setMergedLen(final int mergedLen) { this.mergedLen = mergedLen; }
 
     public Contact getContact() {
         if (this.conversation.getMode() == Conversation.MODE_SINGLE) {
@@ -627,8 +631,14 @@ public class Message extends AbstractEntity implements AvatarService.Avatarable 
     }
 
     public boolean mergeable(final Message message) {
-        return message != null &&
-                (message.getType() == Message.TYPE_TEXT &&
+        if (message == null) {
+            return false;
+        }
+        if (this.mergedLen == null) {
+            this.setMergedLen(this.getBody().length());
+        }
+        int nextMergedLen = this.mergedLen + message.getBody().length();
+        boolean mergeOk = (message.getType() == Message.TYPE_TEXT &&
                         this.getTransferable() == null &&
                         message.getTransferable() == null &&
                         message.getEncryption() != Message.ENCRYPTION_PGP &&
@@ -640,7 +650,7 @@ public class Message extends AbstractEntity implements AvatarService.Avatarable 
                         this.getCounterpart().equals(message.getCounterpart()) &&
                         this.edited() == message.edited() &&
                         (message.getTimeSent() - this.getTimeSent()) <= (Config.MESSAGE_MERGE_WINDOW * 1000) &&
-                        this.getBody().length() + message.getBody().length() <= Config.MAX_DISPLAY_MESSAGE_CHARS &&
+                        nextMergedLen <= Config.MAX_DISPLAY_MESSAGE_CHARS &&
                         !message.isGeoUri() &&
                         !this.isGeoUri() &&
                         !message.isOOb() &&
@@ -656,6 +666,10 @@ public class Message extends AbstractEntity implements AvatarService.Avatarable 
                         this.getReadByMarkers().equals(message.getReadByMarkers()) &&
                         !this.conversation.getJid().asBareJid().equals(Config.BUG_REPORTS)
                 );
+        if (mergeOk) {
+            message.setMergedLen(nextMergedLen);
+        }
+        return mergeOk;
     }
 
     private static boolean isStatusMergeable(int a, int b) {
