@@ -197,6 +197,13 @@
             android:key="font_size"
             android:summary="@string/pref_font_size_summary"
             android:title="@string/pref_font_size" />
+        <EditTextPreference
+            android:defaultValue="@integer/message_bubble_char_lim"
+            android:key="message_bubble_char_lim"
+            android:inputType="numberDecimal"
+            android:digits="0123456789"
+            android:summary="@string/pref_message_bubble_char_lim_summary"
+            android:title="@string/pref_message_bubble_char_lim_title" />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="backup_category"

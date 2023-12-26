@@ -640,7 +640,7 @@ public class Message extends AbstractEntity implements AvatarService.Avatarable 
                         this.getCounterpart().equals(message.getCounterpart()) &&
                         this.edited() == message.edited() &&
                         (message.getTimeSent() - this.getTimeSent()) <= (Config.MESSAGE_MERGE_WINDOW * 1000) &&
-                        this.getBody().length() + message.getBody().length() <= Config.MAX_DISPLAY_MESSAGE_CHARS &&
+                        // this.getBody().length() + message.getBody().length() <= Config.MAX_DISPLAY_MESSAGE_CHARS &&
                         !message.isGeoUri() &&
                         !this.isGeoUri() &&
                         !message.isOOb() &&

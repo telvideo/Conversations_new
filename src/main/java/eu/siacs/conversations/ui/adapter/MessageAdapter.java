@@ -88,6 +88,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
     private OnContactPictureClicked mOnContactPictureClickedListener;
     private OnContactPictureLongClicked mOnContactPictureLongClickedListener;
     private boolean mUseGreenBackground = false;
+    private int mMaxBubbleChars = 4096;
     private final boolean mForceNames;
 
     public MessageAdapter(final XmppActivity activity, final List<Message> messages, final boolean forceNames) {
@@ -436,8 +437,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             if (hasMeCommand) {
                 body = body.replace(0, Message.ME_COMMAND.length(), nick + " ");
             }
-            if (body.length() > Config.MAX_DISPLAY_MESSAGE_CHARS) {
-                body = new SpannableStringBuilder(body, 0, Config.MAX_DISPLAY_MESSAGE_CHARS);
+            if (this.mMaxBubbleChars > 0 && body.length() > this.mMaxBubbleChars) {
+                body = new SpannableStringBuilder(body, 0, this.mMaxBubbleChars);
                 body.append("\u2026");
             }
             Message.MergeSeparator[] mergeSeparators = body.getSpans(0, body.length(), Message.MergeSeparator.class);
@@ -896,6 +897,13 @@ public class MessageAdapter extends ArrayAdapter<Message> {
     public void updatePreferences() {
         SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(activity);
         this.mUseGreenBackground = p.getBoolean("use_green_background", activity.getResources().getBoolean(R.bool.use_green_background));
+
+        int maxBubbleChars = activity.getResources().getInteger(R.integer.message_bubble_char_lim);
+        try {
+            this.mMaxBubbleChars = Integer.parseInt(p.getString("message_bubble_char_lim", String.valueOf(maxBubbleChars)));
+        } catch (NumberFormatException e) {
+            this.mMaxBubbleChars = maxBubbleChars;
+        }
     }
 
 
