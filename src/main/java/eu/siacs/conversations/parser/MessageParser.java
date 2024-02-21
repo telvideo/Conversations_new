@@ -410,13 +410,40 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
         if (timestamp == null) {
             timestamp = AbstractParser.parseTimestamp(original, AbstractParser.parseTimestamp(packet));
         }
-        final LocalizedContent body = packet.getBody();
         final Element mucUserElement = packet.findChild("x", Namespace.MUC_USER);
         final String pgpEncrypted = packet.findChildContent("x", "jabber:x:encrypted");
-        final Element replaceElement = packet.findChild("replace", "urn:xmpp:message-correct:0");
         final Element oob = packet.findChild("x", Namespace.OOB);
         final String oobUrl = oob != null ? oob.findChildContent("url") : null;
-        final String replacementId = replaceElement == null ? null : replaceElement.getAttribute("id");
+
+        Element replaceElement = packet.findChild("replace", "urn:xmpp:message-correct:0");
+        String replacementId = replaceElement == null ? null : replaceElement.getAttribute("id");
+        if (replacementId == null) {
+            // https://xmpp.org/extensions/xep-0425.html version 0.2.1
+            final Element fasten = packet.findChild("apply-to", "urn:xmpp:fasten:0");
+            if (fasten != null) {
+                replaceElement = fasten.findChild("moderated", "urn:xmpp:message-moderate:0");
+                if (replaceElement != null) {
+                    final String reason = replaceElement.findChildContent("reason", "urn:xmpp:message-moderate:0");
+                    replacementId = fasten.getAttribute("id");
+                    packet.setBody(reason == null ? "" : reason);
+                }
+            } else {
+                // https://github.com/xsf/xeps/pull/1271
+                replaceElement = packet.findChild("retract", "urn:xmpp:message-retract:1");
+                if (replaceElement != null) {
+                    final Element moderated = replaceElement.findChild("moderated", "urn:xmpp:message-moderate:1");
+                    if (moderated != null) {
+                        final String reason = replaceElement.findChildContent("reason", "urn:xmpp:message-moderate:1");
+                        replacementId = replaceElement.getAttribute("id");
+                        packet.setBody(reason == null ? "" : reason);
+                    } else {
+                        replaceElement = null; // Some other retraction type
+                    }
+                }
+            }
+        }
+        final LocalizedContent body = packet.getBody();
+
         final Element axolotlEncrypted = packet.findChildEnsureSingle(XmppAxolotlMessage.CONTAINERTAG, AxolotlService.PEP_PREFIX);
         int status;
         final Jid counterpart;
@@ -635,7 +662,7 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
                             && replacedMessage.getTrueCounterpart().asBareJid().equals(message.getTrueCounterpart().asBareJid());
                     final boolean mucUserMatches = query == null && replacedMessage.sameMucUser(message); //can not be checked when using mam
                     final boolean duplicate = conversation.hasDuplicateMessage(message);
-                    if (fingerprintsMatch && (trueCountersMatch || !conversationMultiMode || mucUserMatches) && !duplicate) {
+                    if (fingerprintsMatch && (trueCountersMatch || !conversationMultiMode || mucUserMatches || counterpart.isBareJid()) && !duplicate) {
                         Log.d(Config.LOGTAG, "replaced message '" + replacedMessage.getBody() + "' with '" + message.getBody() + "'");
                         synchronized (replacedMessage) {
                             final String uuid = replacedMessage.getUuid();
@@ -643,6 +670,11 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
                             replacedMessage.setBody(message.getBody());
                             replacedMessage.putEdited(replacedMessage.getRemoteMsgId(), replacedMessage.getServerMsgId());
                             replacedMessage.setRemoteMsgId(remoteMsgId);
+                            if (replaceElement != null && !replaceElement.getName().equals("replace")) {
+                                mXmppConnectionService.getFileBackend().deleteFile(replacedMessage);
+                                mXmppConnectionService.evictPreview(message.getUuid());
+                                replacedMessage.setOob(false);
+                            }
                             if (replacedMessage.getServerMsgId() == null || message.getServerMsgId() != null) {
                                 replacedMessage.setServerMsgId(message.getServerMsgId());
                             }
@@ -671,6 +703,7 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
                         Log.d(Config.LOGTAG, account.getJid().asBareJid() + ": received message correction but verification didn't check out");
                     }
                 }
+                if (replaceElement != null && !replaceElement.getName().equals("replace")) return;
             }
 
             long deletionDate = mXmppConnectionService.getAutomaticMessageDeletionDate();
