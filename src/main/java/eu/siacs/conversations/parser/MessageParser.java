@@ -271,6 +271,18 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
                     mXmppConnectionService.updateConversationUi();
                 }
             }
+        } else if (Namespace.MDS_DISPLAYED.equals(node) && account.getJid().asBareJid().equals(from)) {
+            final Element item = items.findChild("item");
+            final Jid jid = item == null ? null : InvalidJid.getNullForInvalid(item.getAttributeAsJid("id"));
+            if (jid != null) {
+                final Element displayed = item.findChild("displayed", Namespace.MDS_DISPLAYED);
+                final Element stanzaId = displayed == null ? null : displayed.findChild("stanza-id", Namespace.STANZA_IDS);
+                final String id = stanzaId == null ? null : stanzaId.getAttribute("id");
+                final Conversation conversation = mXmppConnectionService.find(account, jid);
+                if (id != null && conversation != null) {
+                    markReadUpToStanzaId(conversation, id);
+                }
+            }
         } else {
             Log.d(Config.LOGTAG, account.getJid().asBareJid() + " received pubsub notification for node=" + node);
         }
@@ -985,12 +997,18 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
                 }
             }
         }
-        Element displayed = packet.findChild("displayed", "urn:xmpp:chat-markers:0");
+        final Element displayed = packet.findChild("displayed", "urn:xmpp:chat-markers:0");
         if (displayed != null) {
             final String id = displayed.getAttribute("id");
             final Jid sender = InvalidJid.getNullForInvalid(displayed.getAttributeAsJid("sender"));
             if (packet.fromAccount(account) && !selfAddressed) {
-                dismissNotification(account, counterpart, query, id);
+                final Conversation c =
+                        mXmppConnectionService.find(account, counterpart.asBareJid());
+                final Message message =
+                        (c == null || id == null) ? null : c.findReceivedWithRemoteId(id);
+                if (message != null && (query == null || query.isCatchup())) {
+                    markReadUpTo(c, message);
+                }
                 if (query == null) {
                     activateGracePeriod(account);
                 }
@@ -1012,7 +1030,7 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
                     final boolean trueJidMatchesAccount = account.getJid().asBareJid().equals(trueJid == null ? null : trueJid.asBareJid());
                     if (trueJidMatchesAccount || conversation.getMucOptions().isSelf(counterpart)) {
                         if (!message.isRead() && (query == null || query.isCatchup())) { //checking if message is unread fixes race conditions with reflections
-                            mXmppConnectionService.markRead(conversation);
+                            markReadUpTo(conversation, message);
                         }
                     } else if (!counterpart.isBareJid() && trueJid != null) {
                         final ReadByMarker readByMarker = ReadByMarker.from(counterpart, trueJid);
@@ -1070,6 +1088,38 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
                 Log.w(Config.LOGTAG, account.getJid().asBareJid() + ": received dismissing display marker that did not match our last id in that conversation");
             }
         }
+    }
+
+    private void markReadUpToStanzaId(final Conversation conversation, final String stanzaId) {
+        final Message message = conversation.findMessageWithServerMsgId(stanzaId);
+        if (message == null) { // do we want to check if isRead?
+            return;
+        }
+        markReadUpTo(conversation, message);
+    }
+
+    private void markReadUpTo(final Conversation conversation, final Message message) {
+        final boolean isDismissNotification = isDismissNotification(message);
+        final var uuid = message.getUuid();
+        Log.d(
+                Config.LOGTAG,
+                conversation.getAccount().getJid().asBareJid()
+                        + ": mark "
+                        + conversation.getJid().asBareJid()
+                        + " as read up to "
+                        + uuid);
+        mXmppConnectionService.markRead(conversation, uuid, isDismissNotification);
+    }
+
+    private static boolean isDismissNotification(final Message message) {
+        Message next = message.next();
+        while (next != null) {
+            if (message.getStatus() == Message.STATUS_RECEIVED) {
+                return false;
+            }
+            next = next.next();
+        }
+        return true;
     }
 
     private void processMessageReceipts(final Account account, final MessagePacket packet, final String remoteMsgId, MessageArchiveService.Query query) {

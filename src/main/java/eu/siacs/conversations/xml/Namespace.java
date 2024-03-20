@@ -76,4 +76,6 @@ public final class Namespace {
     public static final String REPORTING_REASON_SPAM = "urn:xmpp:reporting:spam";
     public static final String SDP_OFFER_ANSWER = "urn:ietf:rfc:3264";
     public static final String HASHES = "urn:xmpp:hashes:2";
+    public static final String MDS_DISPLAYED = "urn:xmpp:mds:displayed:0";
+    public static final String MDS_SERVER_ASSIST = "urn:xmpp:mds:server-assist:0";
 }

@@ -49,6 +49,7 @@ import android.util.Pair;
 import androidx.annotation.BoolRes;
 import androidx.annotation.IntegerRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.RemoteInput;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Consumer;
@@ -56,6 +57,8 @@ import androidx.core.util.Consumer;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 
 import org.conscrypt.Conscrypt;
 import org.jxmpp.stringprep.libidn.LibIdnXmppStringprep;
@@ -2033,6 +2036,7 @@ public class XmppConnectionService extends Service {
 
     private void pushNodeAndEnforcePublishOptions(final Account account, final String node, final Element element, final String id, final Bundle options, final boolean retry) {
         final IqPacket packet = mIqGenerator.publishElement(node, element, id, options);
+        Log.d(Config.LOGTAG,"--> "+packet.toString());
         sendIqPacket(account, packet, (a, response) -> {
             if (response.getType() == IqPacket.TYPE.RESULT) {
                 return;
@@ -4534,22 +4538,99 @@ public class XmppConnectionService extends Service {
         }
     }
 
-    public void sendReadMarker(final Conversation conversation, String upToUuid) {
-        final boolean isPrivateAndNonAnonymousMuc = conversation.getMode() == Conversation.MODE_MULTI && conversation.isPrivateAndNonAnonymous();
+    public void sendReadMarker(final Conversation conversation, final String upToUuid) {
+        final boolean isPrivateAndNonAnonymousMuc =
+                conversation.getMode() == Conversation.MODE_MULTI
+                        && conversation.isPrivateAndNonAnonymous();
         final List<Message> readMessages = this.markRead(conversation, upToUuid, true);
-        if (readMessages.size() > 0) {
-            updateConversationUi();
+        if (readMessages.isEmpty()) {
+            return;
         }
-        final Message markable = Conversation.getLatestMarkableMessage(readMessages, isPrivateAndNonAnonymousMuc);
-        if (confirmMessages()
-                && markable != null
-                && (markable.trusted() || isPrivateAndNonAnonymousMuc)
-                && markable.getRemoteMsgId() != null) {
-            Log.d(Config.LOGTAG, conversation.getAccount().getJid().asBareJid() + ": sending read marker to " + markable.getCounterpart().toString());
-            final Account account = conversation.getAccount();
-            final MessagePacket packet = mMessageGenerator.confirm(markable);
+        final var account = conversation.getAccount();
+        final var connection = account.getXmppConnection();
+        updateConversationUi();
+        final var last =
+                Iterables.getLast(
+                        Collections2.filter(
+                                readMessages,
+                                m ->
+                                        !m.isPrivateMessage()
+                                                && m.getStatus() == Message.STATUS_RECEIVED),
+                        null);
+        if (last == null) {
+            return;
+        }
+
+        final boolean sendDisplayedMarker =
+                confirmMessages()
+                        && (last.trusted() || isPrivateAndNonAnonymousMuc)
+                        && last.getRemoteMsgId() != null
+                        && (last.markable || isPrivateAndNonAnonymousMuc);
+        final boolean serverAssist =
+                connection != null && connection.getFeatures().mdsServerAssist();
+
+        final String stanzaId = last.getServerMsgId();
+
+        if (sendDisplayedMarker && serverAssist) {
+            final var mdsDisplayed = mIqGenerator.mdsDisplayed(stanzaId, conversation);
+            final MessagePacket packet = mMessageGenerator.confirm(last);
+            packet.addChild(mdsDisplayed);
+            if (!last.isPrivateMessage()) {
+                packet.setTo(packet.getTo().asBareJid());
+            }
+            Log.d(Config.LOGTAG,account.getJid().asBareJid()+": server assisted "+packet);
             this.sendMessagePacket(account, packet);
+        } else {
+            publishMds(last);
+            // read markers will be sent after MDS to flush the CSI stanza queue
+            if (sendDisplayedMarker) {
+                Log.d(
+                        Config.LOGTAG,
+                        conversation.getAccount().getJid().asBareJid()
+                                + ": sending displayed marker to "
+                                + last.getCounterpart().toString());
+                final MessagePacket packet = mMessageGenerator.confirm(last);
+                this.sendMessagePacket(account, packet);
+            }
         }
+    }
+
+    private void publishMds(@Nullable final Message message) {
+        final String stanzaId = message == null ? null : message.getServerMsgId();
+        if (Strings.isNullOrEmpty(stanzaId)) {
+            return;
+        }
+        final Conversation conversation;
+        final var conversational = message.getConversation();
+        if (conversational instanceof Conversation c) {
+            conversation = c;
+        } else {
+            return;
+        }
+        final var account = conversation.getAccount();
+        final var connection = account.getXmppConnection();
+        if (connection == null || !connection.getFeatures().pepPublishOptions()) {
+            return;
+        }
+        final Jid itemId;
+        if (message.isPrivateMessage()) {
+            itemId = message.getCounterpart();
+        } else {
+            itemId = conversation.getJid().asBareJid();
+        }
+        Log.d(Config.LOGTAG,"publishing mds for "+itemId+"/"+stanzaId);
+        publishMds(account, itemId, stanzaId, conversation);
+    }
+
+    private void publishMds(
+            final Account account, final Jid itemId, final String stanzaId, final Conversation conversation) {
+        final var item = mIqGenerator.mdsDisplayed(stanzaId, conversation);
+        pushNodeAndEnforcePublishOptions(
+                account,
+                Namespace.MDS_DISPLAYED,
+                item,
+                itemId.toEscapedString(),
+                PublishOptions.persistentWhitelistAccessMaxItems());
     }
 
     public MemorizingTrustManager getMemorizingTrustManager() {
