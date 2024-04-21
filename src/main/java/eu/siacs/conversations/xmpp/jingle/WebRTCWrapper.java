@@ -1,5 +1,7 @@
 package eu.siacs.conversations.xmpp.jingle;
 
+import static android.media.MediaRecorder.AudioSource.*;
+
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
@@ -260,6 +262,7 @@ public class WebRTCWrapper {
                                 JavaAudioDeviceModule.builder(requireContext())
                                         .setUseHardwareAcousticEchoCanceler(
                                                 setUseHardwareAcousticEchoCanceler)
+                                        .setAudioSource(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? VOICE_PERFORMANCE : VOICE_COMMUNICATION)
                                         .createAudioDeviceModule())
                         .createPeerConnectionFactory();
 
